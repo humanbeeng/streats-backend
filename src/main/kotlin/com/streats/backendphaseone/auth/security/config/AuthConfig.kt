@@ -29,5 +29,7 @@ class AuthConfig(private val streatsUserService: StreatsUserService) : WebSecuri
             .authorizeRequests().mvcMatchers("/cart/**").hasRole("USER")
             .and()
             .authorizeRequests().mvcMatchers("/auth/**").permitAll()
+            .and()
+            .authorizeRequests().mvcMatchers("/vendor/**").hasAnyRole("ADMIN", "VENDOR")
     }
 }
