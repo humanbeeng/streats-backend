@@ -22,9 +22,10 @@ class AuthConfig(private val streatsUserService: StreatsUserService) : WebSecuri
         http.cors().disable()
         http.csrf().disable()
         http.addFilterBefore(AuthorizationFilter(JWTUtil()), BasicAuthenticationFilter::class.java)
+
             .authorizeRequests().mvcMatchers("/admin/**").hasRole("ADMIN")
             .and()
-            .authorizeRequests().mvcMatchers("/home/**").hasAnyRole("USER")
+            .authorizeRequests().mvcMatchers("/shops/**").hasAnyRole("USER")
             .and()
             .authorizeRequests().mvcMatchers("/cart/**").hasRole("USER")
             .and()
