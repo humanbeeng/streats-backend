@@ -1,10 +1,11 @@
 package com.streats.backendphaseone.shop.domain.models
 
+import org.bson.types.ObjectId
 import org.springframework.data.annotation.Id
 
 data class DishItem(
     @Id
-    val id: String?,
+    val id: ObjectId,
     val name: String,
     val price: Int,
 ) {

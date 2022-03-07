@@ -10,5 +10,5 @@ interface StreatsShopRepository : MongoRepository<StreatsShop, String> {
     @Query("{'shop_name':{\$regex:?0,\$options:'i'}}")
     fun findByshop_name(shop_name: String): List<StreatsShop>
 
-    override fun findById(dish_id:String): Optional<StreatsShop>
+    fun findBy_id(dish_id:String): StreatsShop
 }

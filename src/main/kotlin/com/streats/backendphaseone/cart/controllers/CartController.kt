@@ -16,7 +16,7 @@ class CartController(private val cartService: CartServices) {
 
     @GetMapping(path = ["/update"])
     fun addItemToCart(@RequestBody requestBody: CartRequestBody): ResponseEntity<HttpStatus> {
-        cartService.addToCart(requestBody.id,requestBody.dish_id,requestBody.quantity)
+        cartService.addToCart(requestBody.id, requestBody.dish_id, requestBody.quantity)
 
 
 

@@ -2,6 +2,7 @@ package com.streats.backendphaseone.cart.services
 
 import com.streats.backendphaseone.auth.service.StreatsUserService
 import com.streats.backendphaseone.cart.domain.usecase.UpdateUserCart
+import org.bson.types.ObjectId
 import org.springframework.context.annotation.Configuration
 import org.springframework.stereotype.Component
 import org.springframework.stereotype.Service
@@ -13,9 +14,8 @@ class CartServices(
     private val updateUserCart: UpdateUserCart
 ) {
 
-    fun addToCart(id: String, dishId: String, quantity: Int) {
+    fun addToCart(id: String, dishId: ObjectId, quantity: Int) {
         val user = streatsUserService.getStreatsCustomer(id)
-
         updateUserCart.userCart(user, dishId, quantity)
     }
 }

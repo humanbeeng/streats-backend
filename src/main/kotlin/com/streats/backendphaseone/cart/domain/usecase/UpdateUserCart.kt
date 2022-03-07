@@ -5,6 +5,7 @@ import com.streats.backendphaseone.auth.service.StreatsUserService
 import com.streats.backendphaseone.cart.domain.models.CartItem
 import com.streats.backendphaseone.cart.services.CartServices
 import com.streats.backendphaseone.shop.sevices.ShopService
+import org.bson.types.ObjectId
 import org.springframework.stereotype.Service
 
 @Service
@@ -15,7 +16,7 @@ class UpdateUserCart(
 ) {
 
 
-    fun userCart(streatsCustomer: StreatsCustomer, dishID: String, quantity: Int) {
+    fun userCart(streatsCustomer: StreatsCustomer, dishID: ObjectId, quantity: Int) {
         val doesItemExist = streatsCustomer.cart.containsKey(dishID)
         if (doesItemExist) {
             updateCart(streatsCustomer, dishID, quantity)
@@ -24,14 +25,15 @@ class UpdateUserCart(
         }
     }
 
-    private fun insertToCart(streatsCustomer: StreatsCustomer, dishID: String, quantity: Int) {
+    private fun insertToCart(streatsCustomer: StreatsCustomer, dishID: ObjectId, quantity: Int) {
         val shop = shopService.getShopByDishId(dishID)
-        val dishItem = shop.get().shop_items.find {
-            it?.id == dishID
+        val id = dishID.toString()
+        val dishItem = shop.get().shop_items.find { item ->
+            item?.id == dishID
         }
         val cartItem = dishItem?.let {
             CartItem(
-                dish_id = dishItem.id,
+                id = dishItem.id,
                 price = dishItem.price,
                 name = dishItem.name,
                 quantity = quantity
@@ -43,7 +45,7 @@ class UpdateUserCart(
         streatsUserService.updateStreatsCustomer(streatsCustomer)
     }
 
-    private fun updateCart(streatsCustomer: StreatsCustomer, dishID: String, quantity: Int) {
+    private fun updateCart(streatsCustomer: StreatsCustomer, dishID: ObjectId, quantity: Int) {
         streatsCustomer.cart[dishID]?.quantity = streatsCustomer.cart[dishID]?.quantity?.plus(quantity)!!
         streatsUserService.updateStreatsCustomer(streatsCustomer)
     }
