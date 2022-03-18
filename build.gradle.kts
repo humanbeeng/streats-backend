@@ -32,6 +32,13 @@ dependencies {
 //    JWT
     implementation("com.auth0:java-jwt:3.18.3")
 
+//    Springfox
+
+    implementation("org.springdoc:springdoc-openapi-ui:1.6.6")
+    implementation("org.springdoc:springdoc-openapi-data-rest:1.6.6")
+    implementation("org.springdoc:springdoc-openapi-kotlin:1.6.6")
+
+
 }
 
 tasks.withType<KotlinCompile> {
