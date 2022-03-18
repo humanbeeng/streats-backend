@@ -5,9 +5,7 @@ import org.springframework.data.annotation.Id
 
 data class DishItem(
     @Id
-    val id: ObjectId,
+    val id: ObjectId? = null,
     val name: String,
     val price: Int,
-) {
-
-}
+)

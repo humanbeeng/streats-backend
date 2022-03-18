@@ -1,11 +1,12 @@
-package com.streats.backendphaseone.shop.models
+package com.streats.backendphaseone.shop.domain.models
 
-import com.mongodb.client.model.geojson.Point
 import org.springframework.data.mongodb.core.geo.GeoJsonPoint
+import org.springframework.data.mongodb.core.mapping.Document
 
-class LocationEntity(
+@Document
+data class LocationEntity(
     val geometry: GeoJsonPoint,
-    val name: String
-) {
-}
+    val locationName: String
+)
+
 
