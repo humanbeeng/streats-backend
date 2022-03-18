@@ -1,5 +1,7 @@
-package com.streats.backendphaseone.auth.domain.models
+package com.streats.backendphaseone.auth.domain.usecase.models
 
+import com.streats.backendphaseone.cart.domain.models.CartItem
+import org.bson.types.ObjectId
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 
@@ -12,6 +14,8 @@ data class StreatsCustomer(
     override val username: String,
 
     val profilePictureUrl: String,
-    val roles: List<String>
-
+    val roles: List<String>,
+    val cart: MutableMap<ObjectId, CartItem>,
+//    val orders:MutableList<Order>List<CartItem>
+//    val dish i
 ) : User

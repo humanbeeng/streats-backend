@@ -2,9 +2,10 @@ package com.streats.backendphaseone.auth.domain.usecase
 
 import com.google.firebase.auth.FirebaseAuth
 import com.streats.backendphaseone.auth.data.dto.AuthResponse
-import com.streats.backendphaseone.auth.domain.models.StreatsCustomer
+import com.streats.backendphaseone.auth.domain.usecase.models.StreatsCustomer
 import com.streats.backendphaseone.auth.service.StreatsUserService
 import com.streats.backendphaseone.auth.util.JWTUtil
+import com.streats.backendphaseone.cart.domain.models.CartItem
 import org.springframework.stereotype.Service
 
 
@@ -52,7 +53,8 @@ class AuthenticateUser(private val service: StreatsUserService, private val jwtU
             email = email,
             firebaseUID = uid,
             profilePictureUrl = profilePictureUrl,
-            roles = listOf("USER")
+            roles = listOf("USER"),
+            cart = mutableMapOf()
         )
     }
 
@@ -86,7 +88,8 @@ class AuthenticateUser(private val service: StreatsUserService, private val jwtU
             email = email,
             firebaseUID = uid,
             profilePictureUrl = profilePictureUrl,
-            roles = listOf("ADMIN")
+            roles = listOf("ADMIN"),
+            cart = mutableMapOf()
         )
     }
 

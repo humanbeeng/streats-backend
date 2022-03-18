@@ -1,7 +1,7 @@
 package com.streats.backendphaseone.auth.service
 
 import com.streats.backendphaseone.auth.data.repository.AuthRepository
-import com.streats.backendphaseone.auth.domain.models.StreatsCustomer
+import com.streats.backendphaseone.auth.domain.usecase.models.StreatsCustomer
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.User
 import org.springframework.security.core.userdetails.UserDetails

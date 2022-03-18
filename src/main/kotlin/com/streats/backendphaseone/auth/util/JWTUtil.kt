@@ -3,7 +3,7 @@ package com.streats.backendphaseone.auth.util
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.auth0.jwt.interfaces.DecodedJWT
-import com.streats.backendphaseone.auth.domain.models.StreatsCustomer
+import com.streats.backendphaseone.auth.domain.usecase.models.StreatsCustomer
 import org.springframework.stereotype.Service
 
 @Service

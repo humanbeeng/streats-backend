@@ -1,4 +1,4 @@
-package com.streats.backendphaseone.auth.domain.models
+package com.streats.backendphaseone.auth.domain.usecase.models
 
 interface User {
     val username: String
