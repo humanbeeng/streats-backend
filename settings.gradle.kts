@@ -1,1 +1,1 @@
-rootProject.name = "backend-phase-one"
+rootProject.name = "streat-backend"
