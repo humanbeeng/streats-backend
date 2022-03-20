@@ -18,7 +18,7 @@ class JWTUtil {
 
         return JWT.create()
             .withIssuer("Streats")
-            .withSubject(streatsCustomer.firebaseUID)
+            .withSubject(streatsCustomer.username)
             .withClaim("roles", roles)
             .sign(Algorithm.HMAC256(signingKey))
     }
@@ -38,6 +38,20 @@ class JWTUtil {
     fun getDecodedToken(accessToken: String): DecodedJWT {
         val verifier = JWT.require(Algorithm.HMAC256(signingKey)).build()
         return verifier.verify(accessToken)
+    }
+
+    fun getUsername(authorizationHeader: String): String {
+        return if (authorizationHeader.isNotBlank() && authorizationHeader.startsWith("Bearer ")) {
+            val incomingAccessToken = authorizationHeader.substring("Bearer ".length)
+
+
+            val decodedToken = getDecodedToken(incomingAccessToken)
+
+
+            decodedToken.subject
+        } else {
+            ""
+        }
     }
 
 
