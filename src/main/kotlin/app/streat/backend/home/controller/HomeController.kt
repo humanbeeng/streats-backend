@@ -16,12 +16,16 @@ class HomeController(private val shopService: ShopService, private val jwtUtil: 
      */
     @GetMapping
     fun home(@RequestHeader("Authorization") authorization: String): ResponseEntity<Home> {
-        val username = jwtUtil.getUsername(authorization)
-        val featuredShops = shopService.getFeaturedShops()
-        val shops = shopService.getAllShops()
-        val home =
-            Home(username, featuredShops, shops)
-        return ResponseEntity.ok(home)
+        return try {
+            val username = jwtUtil.getUsername(authorization)
+            val featuredShops = shopService.getFeaturedShops()
+            val shops = shopService.getAllShops()
+            val home =
+                Home(username, featuredShops, shops)
+            ResponseEntity.ok(home)
+        } catch (e: NoSuchElementException) {
+            ResponseEntity.badRequest().build()
+        }
     }
 
     @GetMapping("/{shopId}")
