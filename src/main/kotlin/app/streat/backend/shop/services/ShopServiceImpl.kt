@@ -1,4 +1,4 @@
-package app.streat.backend.shop.sevices
+package app.streat.backend.shop.services
 
 import app.streat.backend.shop.data.repositories.StreatsShopRepository
 import app.streat.backend.shop.domain.models.DishItem
@@ -41,7 +41,7 @@ class ShopService(private val repo: StreatsShopRepository) {
                     GeoJsonPoint(
                         100.4, 98.3
                     ),
-                    locationName = "Ashok nagar"
+                    zipCode = "Ashok nagar"
                 ),
                 isShopOpen = true,
                 shopItems = mutableListOf(DishItem(id = ObjectId(), name = "Masala Puri", price = 40)),
