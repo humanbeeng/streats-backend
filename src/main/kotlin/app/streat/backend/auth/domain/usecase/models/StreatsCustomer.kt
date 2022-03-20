@@ -4,6 +4,7 @@ import app.streat.backend.cart.domain.models.CartItem
 import org.bson.types.ObjectId
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
+import org.springframework.data.mongodb.core.mapping.Field
 
 @Document(collection = "users")
 data class StreatsCustomer(
@@ -13,9 +14,8 @@ data class StreatsCustomer(
     override val email: String,
     override val username: String,
 
+    @Field("profile_picture_url")
     val profilePictureUrl: String,
     val roles: List<String>,
     val cart: MutableMap<ObjectId, CartItem>,
-//    val orders:MutableList<Order>List<CartItem>
-//    val dish i
 ) : User
