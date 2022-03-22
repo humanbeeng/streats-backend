@@ -1,5 +1,12 @@
 package app.streat.backend.cart.domain.models
 
-import org.bson.types.ObjectId
+import org.springframework.data.mongodb.core.mapping.Field
 
-data class CartItem(var quantity: Int, val id: ObjectId, val name: String, val price: Int)
+data class CartItem(
+    @Field("shop_id")
+    val shopId: String,
+    @Field("item_name")
+    val itemName: String,
+    var quantity: Int = 0,
+    val price: Double
+)
