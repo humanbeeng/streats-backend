@@ -4,6 +4,7 @@ import app.streat.backend.auth.util.JWTUtil
 import app.streat.backend.cart.data.dto.CartDTO
 import app.streat.backend.cart.domain.models.Cart
 import app.streat.backend.cart.service.CartService
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
@@ -39,7 +40,7 @@ class CartController(
             val updatedCart = cartService.addToCart(jwtUtil.getUserId(accessToken), cartDTO)
             ResponseEntity.ok(updatedCart)
         } catch (e: Exception) {
-            ResponseEntity.badRequest().build()
+            ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).build()
         }
     }
 
