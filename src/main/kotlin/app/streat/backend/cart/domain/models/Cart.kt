@@ -1,7 +1,8 @@
 package app.streat.backend.cart.domain.models
 
 data class Cart(
-    val cartItems: MutableMap<String, CartItem>,
-    val totalCost: Double
+    var itemCount: Int = 0,
+    var cartItems: MutableMap<String, CartItem> = mutableMapOf(),
+    var totalCost: Double = 0.00
 )
 
