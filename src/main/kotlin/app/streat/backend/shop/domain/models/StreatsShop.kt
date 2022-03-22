@@ -25,7 +25,9 @@ data class StreatsShop(
 
 
     @Field("shop_items")
-    val shopItems: List<DishItem>,
+//    val shopItems: List<DishItem>,
+
+    val shopItems: MutableMap<String, DishItem>,
 
     @Field("is_takeaway_supported")
     val isTakeawaySupported: Boolean,
