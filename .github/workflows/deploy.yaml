@@ -15,7 +15,7 @@ env:
   DOCKER_HUB_USERNAME: humanbeeng
   #AWS & Elastic Beanstalk
   AWS_REGION: ap-south-1
-  EB_ENVIRONMENT_NAME: streats-backend
+  EB_ENVIRONMENT_NAME: Streatsbackend-env
   EB_APPLICATION_NAME: streats-backend
   EB_DEPLOYMENT_PACKAGE: elb/docker-compose.yaml
 
