@@ -54,7 +54,8 @@ class AuthenticateUser(private val service: StreatsUserService, private val jwtU
             firebaseUID = uid,
             profilePictureUrl = profilePictureUrl,
             roles = listOf("USER"),
-            cart = Cart()
+            cart = Cart(),
+            orders = mutableListOf()
         )
     }
 
@@ -89,7 +90,8 @@ class AuthenticateUser(private val service: StreatsUserService, private val jwtU
             firebaseUID = uid,
             profilePictureUrl = profilePictureUrl,
             roles = listOf("ADMIN"),
-            cart = Cart()
+            cart = Cart(),
+            orders = mutableListOf()
         )
     }
 
