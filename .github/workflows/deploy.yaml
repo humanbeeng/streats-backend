@@ -65,7 +65,7 @@ jobs:
         run: |
           BUILD_NUMBER=${{steps.build-number.outputs.BUILD_NUMBER}}
           echo -e "Current elb/docker-compose.yaml\n$(cat elb/docker-compose.yaml)"
-          sed -i -E 's_(humanbeeng/ecomm:)([^"]*)_\1'${BUILD_NUMBER}'_' elb/docker-compose.yaml 
+          sed -i -E 's_(humanbeeng/streat-backend:)([^"]*)_\1'${BUILD_NUMBER}'_' elb/docker-compose.yaml 
           echo -e "Current elb/docker-compose.yaml\n$(cat elb/docker-compose.yaml)"
           git config user.name github-actions
           git config user.email github-actions@github.com
