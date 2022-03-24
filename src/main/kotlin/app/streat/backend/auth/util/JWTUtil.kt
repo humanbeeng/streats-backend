@@ -10,6 +10,9 @@ import org.springframework.stereotype.Service
 @Service
 class JWTUtil {
 
+    /**
+     * TODO : Move this into properties file
+     */
     private val signingKey: String = "signing-key"
 
     fun createAccessToken(streatsCustomer: StreatsCustomer): String {
@@ -19,7 +22,7 @@ class JWTUtil {
 
         return JWT.create()
             .withIssuer("Streats")
-            .withSubject(streatsCustomer.username)
+            .withSubject(streatsCustomer.firebaseUID)
             .withClaim("roles", roles)
             .sign(Algorithm.HMAC256(signingKey))
     }
@@ -41,8 +44,11 @@ class JWTUtil {
         return verifier.verify(accessToken)
     }
 
+    /**
+     * TODO : Move this to UserService and refactor to get username from UserService
+     */
     fun getUsername(authorizationHeader: String): String {
-        return if (authorizationHeader.isNotBlank() && authorizationHeader.startsWith("Bearer ")) {
+        return if (isAuthorizationHeaderValid(authorizationHeader)) {
             val incomingAccessToken = authorizationHeader.substring("Bearer ".length)
 
 
@@ -53,6 +59,24 @@ class JWTUtil {
         } else {
             throw BadCredentialsException("Invalid access token")
         }
+    }
+
+    fun getUserId(authorizationHeader: String): String {
+        return if (isAuthorizationHeaderValid(authorizationHeader)) {
+            val incomingAccessToken = authorizationHeader.substring("Bearer ".length)
+
+
+            val decodedToken = getDecodedToken(incomingAccessToken)
+
+
+            decodedToken.subject
+        } else {
+            throw BadCredentialsException("Invalid access token")
+        }
+    }
+
+    private fun isAuthorizationHeaderValid(authorizationHeader: String): Boolean {
+        return authorizationHeader.isNotBlank() && authorizationHeader.startsWith("Bearer ")
     }
 
 
