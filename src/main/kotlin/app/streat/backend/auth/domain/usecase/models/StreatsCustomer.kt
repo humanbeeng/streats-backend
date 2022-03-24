@@ -1,6 +1,7 @@
 package app.streat.backend.auth.domain.usecase.models
 
 import app.streat.backend.cart.domain.models.Cart
+import app.streat.backend.order.domain.model.Order
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.core.mapping.Field
@@ -16,5 +17,6 @@ data class StreatsCustomer(
     @Field("profile_picture_url")
     val profilePictureUrl: String,
     val roles: List<String>,
-    val cart: Cart
+    val cart: Cart,
+    val orders: MutableList<Order>
 ) : User

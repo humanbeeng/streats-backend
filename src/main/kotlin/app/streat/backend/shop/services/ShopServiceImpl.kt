@@ -66,7 +66,10 @@ class ShopServiceImpl(private val repo: StreatsShopRepository, private val mongo
                 zipcode = "100000",
                 isShopOpen = true,
 
-                shopItems = mutableListOf(DishItem(id = ObjectId(), name = "Masala Puri", price = 40)),
+                shopItems = mutableMapOf(
+                    ObjectId().toString() to DishItem("Masala Puri", 90.00),
+                    ObjectId().toString() to DishItem("Gobi Manchurian", 45.00)
+                ),
                 isTakeawaySupported = true,
                 featured = false
             ),
@@ -78,7 +81,10 @@ class ShopServiceImpl(private val repo: StreatsShopRepository, private val mongo
                 ),
                 zipcode = "100004",
                 isShopOpen = true,
-                shopItems = mutableListOf(DishItem(id = ObjectId(), name = "Masala Puri", price = 40)),
+                shopItems = mutableMapOf(
+                    ObjectId().toString() to DishItem("Masala Puri", 90.00),
+                    ObjectId().toString() to DishItem("Gobi Manchurian", 45.00)
+                ),
                 isTakeawaySupported = true,
                 featured = false
 
@@ -91,7 +97,10 @@ class ShopServiceImpl(private val repo: StreatsShopRepository, private val mongo
                 ),
                 zipcode = "100005",
                 isShopOpen = true,
-                shopItems = mutableListOf(DishItem(id = ObjectId(), name = "Masala Puri", price = 40)),
+                shopItems = mutableMapOf(
+                    ObjectId().toString() to DishItem("Masala Puri", 90.00),
+                    ObjectId().toString() to DishItem("Gobi Manchurian", 45.00)
+                ),
                 isTakeawaySupported = true,
                 featured = true
             ),
@@ -103,7 +112,10 @@ class ShopServiceImpl(private val repo: StreatsShopRepository, private val mongo
                 ),
                 zipcode = "100000",
                 isShopOpen = false,
-                shopItems = mutableListOf(DishItem(id = ObjectId(), name = "Gobi Noodles", price = 40)),
+                shopItems = mutableMapOf(
+                    ObjectId().toString() to DishItem("Masala Puri", 90.00),
+                    ObjectId().toString() to DishItem("Gobi Manchurian", 45.00)
+                ),
                 isTakeawaySupported = true,
                 featured = false
 

@@ -15,9 +15,9 @@ class HomeController(private val shopService: ShopService, private val jwtUtil: 
      * TODO : Replace with nearby function and intake co-ordinates from client
      */
     @GetMapping
-    fun home(@RequestHeader("Authorization") authorization: String): ResponseEntity<Home> {
+    fun home(@RequestHeader("Authorization") accessToken: String): ResponseEntity<Home> {
         return try {
-            val username = jwtUtil.getUsername(authorization)
+            val username = jwtUtil.getUsername(accessToken)
             val featuredShops = shopService.getFeaturedShops()
             val shops = shopService.getAllShops()
             val home =
