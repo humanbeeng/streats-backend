@@ -51,7 +51,7 @@ jobs:
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
       - name: Gradle Clean Build and Push to Dockerhub
-        run: ./gradlew clean build jib -Djib.to.image=humanbeeng/ecomm:${{steps.build-number.outputs.BUILD_NUMBER}}
+        run: ./gradlew clean build jib -Djib.to.image=humanbeeng/streat-backend:${{steps.build-number.outputs.BUILD_NUMBER}}
 
       - uses: 8398a7/action-slack@v3
         with:
