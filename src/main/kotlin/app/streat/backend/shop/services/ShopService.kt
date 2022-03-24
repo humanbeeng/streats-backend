@@ -19,6 +19,7 @@ interface ShopService {
 
     fun findShopByShopId(shopId: String): StreatsShop
 
+
     /**
      * TODO : Delete these functions
      */
