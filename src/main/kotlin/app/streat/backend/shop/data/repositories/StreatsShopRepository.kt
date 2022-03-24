@@ -17,4 +17,5 @@ interface StreatsShopRepository : MongoRepository<StreatsShop, String> {
 
     fun findByLocationNear(geoJsonPoint: GeoJsonPoint): List<StreatsShop>
 
+    fun findAllByShopItems(dishId: String): List<StreatsShop>
 }
