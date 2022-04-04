@@ -96,14 +96,14 @@ class CartServiceImpl(
             } else {
                 throw CartException.ItemFetchFromCartException("No item present for given dishId")
             }
-            if (user.cart.itemCount == 0) {
-                user.cart.shopId = ""
-            }
+
         } else {
             throw CartException.ItemFetchFromCartException("No item present for given dishId")
         }
         user.cart.itemCount = user.cart.cartItems.size
-
+        if (user.cart.itemCount == 0) {
+            user.cart.shopId = ""
+        }
         return userService.updateStreatsCustomer(user).cart
 
     }
