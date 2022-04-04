@@ -45,7 +45,7 @@ class CartController(
     }
 
 
-    @DeleteMapping
+    @PostMapping("/remove")
     fun deleteCartItem(
         @RequestHeader("Authorization") accessToken: String,
         @RequestBody cartDTO: CartDTO
