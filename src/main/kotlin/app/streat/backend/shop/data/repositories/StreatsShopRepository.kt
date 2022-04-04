@@ -9,7 +9,7 @@ interface StreatsShopRepository : MongoRepository<StreatsShop, String> {
 
     fun findByShopName(shopName: String): List<StreatsShop>
 
-    fun findStreatsShopById(shopId: String): Optional<StreatsShop>
+    fun findStreatsShopByShopId(shopId: String): Optional<StreatsShop>
 
     fun findStreatsShopByZipcode(zipCode: String): List<StreatsShop>
 

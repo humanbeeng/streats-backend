@@ -33,7 +33,7 @@ class ShopServiceImpl(private val repo: StreatsShopRepository, private val mongo
 
     override fun findShopByShopId(shopId: String): StreatsShop {
 
-        return repo.findStreatsShopById(shopId)
+        return repo.findStreatsShopByShopId(shopId)
             .orElseThrow { NoSuchElementException("No shop found with given shopId") }
 
     }
@@ -48,7 +48,7 @@ class ShopServiceImpl(private val repo: StreatsShopRepository, private val mongo
     }
 
     override fun getShopById(shopId: String): StreatsShop {
-        return repo.findStreatsShopById(shopId).orElseThrow { NoSuchElementException("No shop with shop ID found") }
+        return repo.findStreatsShopByShopId(shopId).orElseThrow { NoSuchElementException("No shop with shop ID found") }
     }
 
     /**
