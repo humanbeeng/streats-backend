@@ -5,16 +5,16 @@ import org.springframework.stereotype.Component
 
 
 @Component
-class CashfreeConfig{
+class CashfreeConfig {
 
     @Value("\${CASHFREE_CLIENT_ID}")
-    lateinit var clientId : String
+    lateinit var clientId: String
 
     @Value("\${CASHFREE_CLIENT_SECRET}")
-    lateinit var clientSecret : String
+    lateinit var clientSecret: String
 
     @Value("\${CASHFREE_TOKEN_URL}")
-    lateinit var tokenUrl : String
+    lateinit var tokenUrl: String
 
 
 }

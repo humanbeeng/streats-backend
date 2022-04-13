@@ -1,6 +1,2 @@
 #TODO : Separate out dev and prod URIs
 
-spring:
-  data:
-    mongodb:
-      uri: mongodb+srv://user:pass@authentication.lxkqb.mongodb.net/app?retryWrites=true&w=majority
