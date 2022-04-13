@@ -1,7 +1,7 @@
 version: "3.8"
 services:
   backend:
-    image: "humanbeeng/streat-backend:13.4.2022.5.44.14"
+    image: "humanbeeng/streat-backend:13.4.2022.7.32.36"
     ports:
       - "80:8080"
     restart: "always"
