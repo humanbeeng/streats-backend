@@ -3,7 +3,7 @@ package app.streat.backend.auth.domain.usecase
 import app.streat.backend.auth.data.dto.AuthResponse
 import app.streat.backend.auth.domain.usecase.models.StreatsCustomer
 import app.streat.backend.auth.service.StreatsUserService
-import app.streat.backend.auth.util.JWTUtil
+import app.streat.backend.core.util.JWTUtil
 import app.streat.backend.cart.domain.models.Cart
 import com.google.firebase.auth.FirebaseAuth
 import org.springframework.stereotype.Service

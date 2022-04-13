@@ -1,4 +1,4 @@
-package app.streat.backend.auth.util
+package app.streat.backend.core.util
 
 import app.streat.backend.auth.domain.usecase.models.StreatsCustomer
 import com.auth0.jwt.JWT

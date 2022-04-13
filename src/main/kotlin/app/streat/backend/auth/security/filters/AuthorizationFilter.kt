@@ -1,7 +1,7 @@
 package app.streat.backend.auth.security.filters
 
 import app.streat.backend.auth.security.entities.FirebaseAuthenticationToken
-import app.streat.backend.auth.util.JWTUtil
+import app.streat.backend.core.util.JWTUtil
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.security.core.GrantedAuthority
