@@ -4,16 +4,16 @@ import app.streat.backend.auth.domain.usecase.models.StreatsCustomer
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.auth0.jwt.interfaces.DecodedJWT
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.stereotype.Service
 
 @Service
 class JWTUtil {
 
-    /**
-     * TODO : Move this into properties file
-     */
-    private val signingKey: String = "signing-key"
+
+    @Value("\${JWT_SIGNING_KEY}")
+    private lateinit var signingKey: String
 
     fun createAccessToken(streatsCustomer: StreatsCustomer): String {
         val roles: MutableList<String> = mutableListOf()
