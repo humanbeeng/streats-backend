@@ -27,16 +27,18 @@ dependencies {
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.security:spring-security-test")
+    annotationProcessor ("org.springframework.boot:spring-boot-configuration-processor")
+
 
 //    Firebase
     implementation("com.google.firebase:firebase-admin:8.1.0")
 
 //    JWT
-    implementation("com.auth0:java-jwt:3.18.3")
+    implementation("com.auth0:java-jwt:3.19.1")
 
 //    Springfox
 
-    implementation("org.springdoc:springdoc-openapi-ui:1.6.6")
+    implementation("org.springdoc:springdoc-openapi-ui:1.6.7")
     implementation("org.springdoc:springdoc-openapi-data-rest:1.6.6")
     implementation("org.springdoc:springdoc-openapi-kotlin:1.6.6")
 
