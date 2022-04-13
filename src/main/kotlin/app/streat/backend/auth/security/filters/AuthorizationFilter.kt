@@ -67,6 +67,7 @@ class AuthorizationFilter(private val jwtUtil: JWTUtil) : OncePerRequestFilter()
     override fun shouldNotFilter(request: HttpServletRequest): Boolean {
         return request.servletPath.equals("/auth")
                 || request.servletPath.equals("/auth/admin")
+                || request.servletPath.equals("/ping")
 
 
     }
