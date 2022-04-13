@@ -1,9 +1,1 @@
 #TODO : Separate out dev and prod URIs
-
-spring:
-  data:
-    mongodb:
-      uri: ${SPRING_DATA_MONGODB_URI}
-
-
-
