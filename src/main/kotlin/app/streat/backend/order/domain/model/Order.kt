@@ -3,6 +3,10 @@ package app.streat.backend.order.domain.model
 import app.streat.backend.cart.domain.models.CartItem
 import org.bson.types.ObjectId
 
+/**
+ * TODO : Match with client OrderDTO
+ */
+
 data class Order(
     val orderId: String = ObjectId().toString(),
     val shopId: String,

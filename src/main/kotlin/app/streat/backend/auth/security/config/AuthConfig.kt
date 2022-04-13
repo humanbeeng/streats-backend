@@ -2,7 +2,7 @@ package app.streat.backend.auth.security.config
 
 import app.streat.backend.auth.security.filters.AuthorizationFilter
 import app.streat.backend.auth.service.StreatsUserService
-import app.streat.backend.auth.util.JWTUtil
+import app.streat.backend.core.util.JWTUtil
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder
 import org.springframework.security.config.annotation.web.builders.HttpSecurity

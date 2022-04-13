@@ -1,6 +1,6 @@
 package app.streat.backend.cart.controllers
 
-import app.streat.backend.auth.util.JWTUtil
+import app.streat.backend.core.util.JWTUtil
 import app.streat.backend.cart.data.dto.CartDTO
 import app.streat.backend.cart.domain.models.Cart
 import app.streat.backend.cart.service.CartService

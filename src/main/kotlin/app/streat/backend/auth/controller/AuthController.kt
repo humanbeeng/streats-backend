@@ -15,10 +15,14 @@ class AuthController(private val authenticateUser: AuthenticateUser) {
 
     @PostMapping
     fun authenticate(@RequestBody authRequest: AuthRequest): ResponseEntity<AuthResponse> {
-        val authResponse = authenticateUser.authenticate(authRequest.idToken)
-        return if (authResponse.isVerified) {
+        return try{
+            val authResponse = authenticateUser.authenticate(authRequest.idToken)
+            if (authResponse.isVerified) {
             ResponseEntity.ok(authResponse)
         } else ResponseEntity.badRequest().build()
+        } catch(e: Exception){
+            ResponseEntity.badRequest().build()
+        }
     }
 
 }

@@ -1,7 +1,7 @@
 package app.streat.backend.home.controller
 
 import app.streat.backend.auth.service.StreatsUserService
-import app.streat.backend.auth.util.JWTUtil
+import app.streat.backend.core.util.JWTUtil
 import app.streat.backend.home.domain.models.Home
 import app.streat.backend.shop.domain.models.StreatsShop
 import app.streat.backend.shop.services.ShopService
