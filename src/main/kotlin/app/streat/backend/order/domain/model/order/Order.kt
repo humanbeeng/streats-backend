@@ -1,14 +1,17 @@
-package app.streat.backend.order.domain.model
+package app.streat.backend.order.domain.model.order
 
 import app.streat.backend.cart.domain.models.CartItem
-import org.bson.types.ObjectId
+import org.springframework.data.annotation.Id
+import org.springframework.data.mongodb.core.mapping.Document
 
 /**
  * TODO : Match with client OrderDTO
  */
 
+@Document(collection = "orders")
 data class Order(
-    val orderId: String = ObjectId().toString(),
+    @Id
+    val orderId: String,
     val shopId: String,
     val userId: String,
     val username: String,
@@ -17,6 +20,7 @@ data class Order(
     val totalCost: Double,
     val orderedTime: String,
     val arrivalTime: String,
-    val orderStatus: String,
+    var orderStatus: String,
+    var paymentStatus: String,
     val orderedDate: String
 )
