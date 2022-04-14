@@ -1,12 +1,9 @@
 package app.streat.backend.order.controller
 
-import app.streat.backend.cart.service.exceptions.CartException
 import app.streat.backend.core.util.JWTUtil
-import app.streat.backend.order.data.dto.order_verification.OrderVerificationRequestDTO
-import app.streat.backend.order.domain.model.Order
-import app.streat.backend.order.domain.model.OrderWithToken
+import app.streat.backend.order.domain.model.order.Order
+import app.streat.backend.order.domain.model.order.OrderWithToken
 import app.streat.backend.order.service.OrderService
-import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
@@ -17,8 +14,10 @@ import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/orders")
-class OrderController(private val orderService: OrderService, private val jwtUtil: JWTUtil) {
-
+class OrderController(
+    private val orderService: OrderService,
+    private val jwtUtil: JWTUtil
+) {
 
 
     @GetMapping("/initiate")
@@ -34,19 +33,37 @@ class OrderController(private val orderService: OrderService, private val jwtUti
         }
     }
 
-
-    @PostMapping("/verify")
+    /**
+     * Order Payment Verification Callback
+     *
+     * Callback is invoked only in the case of 'successful' payment. There might be duplicate incoming callbacks for
+     * the same payment, hence the handler needs to be idempotent. The duplicate(invalid) callback will not contain
+     * any 'incoming request params(i.e orderPaymentVerificationRequestParams) will be empty'
+     */
+    @PostMapping("/callback")
     fun verifyOrder(
-        @RequestHeader("Authorization") accessToken: String,
-        @RequestBody orderVerificationRequestDTO: OrderVerificationRequestDTO
-    ): ResponseEntity<Boolean> {
-        val userId = jwtUtil.getUserId(accessToken)
-        return ResponseEntity.ok(orderService.verifyOrderPayment(userId, orderVerificationRequestDTO))
+        @RequestParam orderPaymentVerificationRequest: LinkedHashMap<String, String>
+    ): ResponseEntity<Unit> {
+
+        return try {
+            if (orderPaymentVerificationRequest.isEmpty().not() &&
+                orderService.verifyOrderPayment(orderPaymentVerificationRequest)
+            ) {
+                ResponseEntity.ok().build()
+            } else {
+                ResponseEntity.badRequest().build()
+            }
+        } catch (e: Exception) {
+            ResponseEntity.internalServerError().build()
+        }
+
     }
 
 
     @GetMapping
-    fun getAllOrders(@RequestHeader("Authorization") accessToken: String): ResponseEntity<List<Order>> {
+    fun getAllOrders(
+        @RequestHeader("Authorization") accessToken: String
+    ): ResponseEntity<List<Order>> {
 
         return try {
             val userId = jwtUtil.getUserId(accessToken)
@@ -57,17 +74,6 @@ class OrderController(private val orderService: OrderService, private val jwtUti
 
     }
 
-    @PostMapping
-    fun placeOrder(@RequestHeader("Authorization") accessToken: String): ResponseEntity<Order> {
-        return try {
-            val userId = jwtUtil.getUserId(accessToken)
-            ResponseEntity.ok(orderService.placeOrder(userId))
-        } catch (e: CartException.EmptyCartException) {
-            ResponseEntity.status(HttpStatus.BAD_REQUEST).build()
-        } catch (e: Exception) {
-            ResponseEntity.internalServerError().build()
-        }
-    }
 
     /**
      * Delete this service as it is used only for testing
