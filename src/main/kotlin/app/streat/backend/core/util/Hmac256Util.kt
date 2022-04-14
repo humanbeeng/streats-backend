@@ -16,4 +16,9 @@ class Hmac256Util {
 
         return Base64.encodeBase64String(hash).toString()
     }
+
+    fun verifySignature(data: String, signature: String, key: String): Boolean {
+        val calculatedSignature = createBase64EncodedSignature(data, key)
+        return calculatedSignature == signature
+    }
 }

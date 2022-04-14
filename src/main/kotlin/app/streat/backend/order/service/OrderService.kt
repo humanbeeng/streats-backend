@@ -1,8 +1,7 @@
 package app.streat.backend.order.service
 
-import app.streat.backend.order.data.dto.order_verification.OrderVerificationRequestDTO
-import app.streat.backend.order.domain.model.Order
-import app.streat.backend.order.domain.model.OrderWithToken
+import app.streat.backend.order.domain.model.order.Order
+import app.streat.backend.order.domain.model.order.OrderWithToken
 
 interface OrderService {
 
@@ -10,7 +9,7 @@ interface OrderService {
 
     fun initiateOrder(userId: String): OrderWithToken
 
-    fun verifyOrderPayment(userId: String, orderVerificationRequestDTO: OrderVerificationRequestDTO): Boolean
+    fun verifyOrderPayment(orderPaymentVerificationRequestParams: LinkedHashMap<String, String>): Boolean
 
     fun placeOrder(userId: String): Order
 

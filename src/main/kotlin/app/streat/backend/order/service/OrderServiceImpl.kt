@@ -7,10 +7,13 @@ import app.streat.backend.core.config.CashfreeConfig
 import app.streat.backend.core.util.Hmac256Util
 import app.streat.backend.order.data.dto.cashfree_token.CashfreeTokenRequestDTO
 import app.streat.backend.order.data.dto.cashfree_token.CashfreeTokenResponseDTO
-import app.streat.backend.order.data.dto.order_verification.OrderVerificationRequestDTO
-import app.streat.backend.order.domain.model.Order
-import app.streat.backend.order.domain.model.OrderStatus
-import app.streat.backend.order.domain.model.OrderWithToken
+import app.streat.backend.order.data.dto.order_verification.OrderPaymentVerificationRequest
+import app.streat.backend.order.data.repository.OrderRepository
+import app.streat.backend.order.domain.model.order.Order
+import app.streat.backend.order.domain.model.order.OrderWithToken
+import app.streat.backend.order.domain.model.status.OrderStatus
+import app.streat.backend.order.domain.model.status.PaymentStatus
+import org.bson.types.ObjectId
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
@@ -21,13 +24,17 @@ import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
+/**
+ * TODO : 1. Wrap with try catch and introduce logging instead of spitting out on console
+ */
 
 @Service
 class OrderServiceImpl(
     private val userService: StreatsUserService,
     private val cartService: CartService,
     private val cashfreeConfig: CashfreeConfig,
-    private val hmac256Util: Hmac256Util
+    private val hmac256Util: Hmac256Util,
+    private val orderRepository: OrderRepository
 ) : OrderService {
     override fun getAllOrders(userId: String): List<Order> {
 
@@ -51,6 +58,8 @@ class OrderServiceImpl(
     override fun initiateOrder(userId: String): OrderWithToken {
 
         val order = createOrder(userId)
+
+        orderRepository.save(order)
 
         val tokenRequest = createTokenRequest(order)
 
@@ -83,22 +92,54 @@ class OrderServiceImpl(
         return order
     }
 
+    /**
+     * TODO : Delete this method or move to Admin service
+     */
     override fun deleteAllOrders(userId: String) {
         val user = userService.getStreatsCustomer(userId)
         user.orders.removeAll(user.orders)
         userService.updateStreatsCustomer(user)
     }
 
-    override fun verifyOrderPayment(userId: String, orderVerificationRequestDTO: OrderVerificationRequestDTO): Boolean {
 
-        val dataString = orderVerificationRequestDTO.getDataString()
-        val key = cashfreeConfig.clientSecret
+    /**
+     * Verify Order Payment
+     *
+     * This method handles callback from Cashfree and needs to be idempotent to deal with duplicate callbacks
+     *
+     * Step 1: Extraction of Request Params and modelling into a data class (OrderPaymentVerificationRequest)
+     *
+     * Step 2: Validate Signature
+     *
+     * Step 3: Get the Order Item from UserDB and check if orderPaymentStatus and orderVerificationStatus is SUCCESS
+     * (To handle duplicate callbacks), if not then, set orderPaymentStatus and orderVerificationStatus flags is
+     * IN_PROGRESS. If those flags are set to SUCCESS/FAILURE, then ignore
+     *
+     * Step 4: If the signatures are valid, then update orderPaymentStatus and orderVerificationStatus flags to SUCCESS.
+     * If signature are invalid, then set to FAILURE
+     */
+    override fun verifyOrderPayment(orderPaymentVerificationRequestParams: LinkedHashMap<String, String>): Boolean {
+        val paymentVerificationData =
+            extractOrderPaymentVerificationRequestParams(orderPaymentVerificationRequestParams)
 
-        val calculatedSignature = hmac256Util.createBase64EncodedSignature(dataString, key)
-        val givenSignature = orderVerificationRequestDTO.signature
 
-        return calculatedSignature == givenSignature
+        val isSignatureValid =
+            hmac256Util.verifySignature(
+                paymentVerificationData.getDataString(),
+                paymentVerificationData.signature,
+                cashfreeConfig.clientSecret
+            )
 
+//        Update OrderDB about success or failure
+        val orderId: String = paymentVerificationData.orderId
+
+        if (isSignatureValid) {
+            updateOrderStatus(orderId, PaymentStatus.SUCCESS)
+        } else {
+            updateOrderStatus(orderId, PaymentStatus.FAILURE)
+        }
+
+        return isSignatureValid
     }
 
     private fun createOrder(userId: String): Order {
@@ -110,6 +151,7 @@ class OrderServiceImpl(
         }
 
         return Order(
+            orderId = "STREATS_${userId}_${ObjectId()}",
             shopId = userCart.shopId,
             userId = userId,
             username = user.username,
@@ -119,7 +161,8 @@ class OrderServiceImpl(
             orderedTime = LocalTime.now().format(DateTimeFormatter.ofLocalizedTime(FormatStyle.MEDIUM)),
             orderedDate = LocalDate.now().format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)),
             arrivalTime = LocalTime.now().plusMinutes(10).format(DateTimeFormatter.ofLocalizedTime(FormatStyle.MEDIUM)),
-            orderStatus = OrderStatus.IN_PROGRESS.name
+            orderStatus = OrderStatus.IN_PROGRESS.name,
+            paymentStatus = PaymentStatus.IN_PROGRESS.name
         )
     }
 
@@ -153,4 +196,39 @@ class OrderServiceImpl(
         } else throw Exception("Something went wrong while fetching cftoken ")
 
     }
+
+    private fun extractOrderPaymentVerificationRequestParams(
+        orderPaymentVerificationRequestParams: LinkedHashMap<String, String>
+    ): OrderPaymentVerificationRequest {
+        return OrderPaymentVerificationRequest(
+            orderId = orderPaymentVerificationRequestParams["orderId"] ?: "",
+            orderAmount = orderPaymentVerificationRequestParams["orderAmount"] ?: "",
+            referenceId = orderPaymentVerificationRequestParams["referenceId"] ?: "",
+            txStatus = orderPaymentVerificationRequestParams["txStatus"] ?: "",
+            paymentMode = orderPaymentVerificationRequestParams["paymentMode"] ?: "",
+            txMsg = orderPaymentVerificationRequestParams["txMsg"] ?: "",
+            txTime = orderPaymentVerificationRequestParams["txTime"] ?: "",
+            signature = orderPaymentVerificationRequestParams["signature"] ?: ""
+        )
+    }
+
+    private fun updateOrderStatus(orderId: String, paymentStatus: PaymentStatus) {
+        val order = orderRepository.findOrderByOrderId(orderId)
+        val userId = order.userId
+
+//        Update order status
+        order.paymentStatus = paymentStatus.name
+
+//        Save updated order to User Profile
+        val user = userService.getStreatsCustomer(userId)
+
+        user.orders.add(order)
+
+        userService.updateStreatsCustomer(user)
+
+//        Save updated order in Order Collection
+        orderRepository.save(order)
+
+    }
+
 }

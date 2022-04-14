@@ -1,4 +1,4 @@
-package app.streat.backend.order.domain.model
+package app.streat.backend.order.domain.model.order
 
 
 /**
