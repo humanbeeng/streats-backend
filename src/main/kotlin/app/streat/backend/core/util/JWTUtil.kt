@@ -1,19 +1,19 @@
 package app.streat.backend.core.util
 
 import app.streat.backend.auth.domain.usecase.models.StreatsCustomer
+import app.streat.backend.core.config.JWTConfig
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.auth0.jwt.interfaces.DecodedJWT
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.authentication.BadCredentialsException
-import org.springframework.stereotype.Service
+import org.springframework.stereotype.Component
 
-@Service
-class JWTUtil {
+@Component
+class JWTUtil(jwtConfig: JWTConfig) {
 
 
-    @Value("\${JWT_SIGNING_KEY}")
-    private lateinit var signingKey: String
+    var jwtSigningKey: String = jwtConfig.signingKey
+
 
     fun createAccessToken(streatsCustomer: StreatsCustomer): String {
         val roles: MutableList<String> = mutableListOf()
@@ -24,12 +24,12 @@ class JWTUtil {
             .withIssuer("Streats")
             .withSubject(streatsCustomer.firebaseUID)
             .withClaim("roles", roles)
-            .sign(Algorithm.HMAC256(signingKey))
+            .sign(Algorithm.HMAC256(jwtSigningKey))
     }
 
 
     fun verifyAccessToken(accessToken: String): Boolean {
-        val verifier = JWT.require(Algorithm.HMAC256(signingKey)).build()
+        val verifier = JWT.require(Algorithm.HMAC256(jwtSigningKey)).build()
 
         return try {
             verifier.verify(accessToken)
@@ -40,7 +40,7 @@ class JWTUtil {
     }
 
     fun getDecodedToken(accessToken: String): DecodedJWT {
-        val verifier = JWT.require(Algorithm.HMAC256(signingKey)).build()
+        val verifier = JWT.require(Algorithm.HMAC256(jwtSigningKey)).build()
         return verifier.verify(accessToken)
     }
 
