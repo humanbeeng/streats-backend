@@ -1,6 +1,6 @@
 package app.streat.backend.order.data.dto.order_verification
 
-data class OrderVerificationRequest(
+data class OrderPaymentVerificationRequest(
     val orderId: String,
     val orderAmount: String,
     val referenceId: String,
