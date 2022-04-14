@@ -12,7 +12,10 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 
 @EnableWebSecurity
 @Configuration
-class AuthConfig(private val streatsUserService: StreatsUserService) : WebSecurityConfigurerAdapter() {
+class AuthConfig(
+    private val streatsUserService: StreatsUserService,
+    private val jwtUtil: JWTUtil
+) : WebSecurityConfigurerAdapter() {
 
     override fun configure(auth: AuthenticationManagerBuilder) {
         auth.userDetailsService(streatsUserService)
@@ -21,7 +24,7 @@ class AuthConfig(private val streatsUserService: StreatsUserService) : WebSecuri
     override fun configure(http: HttpSecurity) {
         http.cors().disable()
         http.csrf().disable()
-        http.addFilterBefore(AuthorizationFilter(JWTUtil()), BasicAuthenticationFilter::class.java)
+        http.addFilterBefore(AuthorizationFilter(jwtUtil), BasicAuthenticationFilter::class.java)
             .authorizeRequests().mvcMatchers("/admin/**").hasRole("ADMIN")
             .and()
             .authorizeRequests().mvcMatchers("/shop/**").hasAnyRole("USER", "ADMIN")
