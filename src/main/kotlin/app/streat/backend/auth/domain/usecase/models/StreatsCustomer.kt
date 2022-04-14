@@ -1,7 +1,7 @@
 package app.streat.backend.auth.domain.usecase.models
 
 import app.streat.backend.cart.domain.models.Cart
-import app.streat.backend.order.domain.model.Order
+import app.streat.backend.order.domain.model.order.Order
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.core.mapping.Field
