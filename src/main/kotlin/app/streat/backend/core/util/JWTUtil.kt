@@ -1,6 +1,6 @@
 package app.streat.backend.core.util
 
-import app.streat.backend.auth.domain.usecase.models.StreatsCustomer
+import app.streat.backend.auth.domain.models.user.StreatsCustomer
 import app.streat.backend.core.config.JWTConfig
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component
 class JWTUtil(jwtConfig: JWTConfig) {
 
 
-    var jwtSigningKey: String = jwtConfig.signingKey
+    val jwtSigningKey: String = jwtConfig.signingKey
 
 
     fun createAccessToken(streatsCustomer: StreatsCustomer): String {
