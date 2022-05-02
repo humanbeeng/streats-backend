@@ -4,12 +4,11 @@ import app.streat.backend.shop.data.repositories.StreatsShopRepository
 import app.streat.backend.shop.domain.models.DishItem
 import app.streat.backend.shop.domain.models.StreatsShop
 import org.bson.types.ObjectId
-import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.geo.GeoJsonPoint
 import org.springframework.stereotype.Service
 
 @Service
-class ShopServiceImpl(private val repo: StreatsShopRepository, private val mongoTemplate: MongoTemplate) : ShopService {
+class ShopServiceImpl(private val repo: StreatsShopRepository) : ShopService {
 
     /**
      * TODO : Move this to admin service

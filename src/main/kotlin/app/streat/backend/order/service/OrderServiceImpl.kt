@@ -149,7 +149,6 @@ class OrderServiceImpl(
         if (userCart.itemCount == 0) {
             throw CartException.EmptyCartException("No items in cart to create order")
         }
-
         return Order(
             orderId = "STREATS_${userId}_${ObjectId()}",
             shopId = userCart.shopId,
@@ -162,7 +161,8 @@ class OrderServiceImpl(
             orderedDate = LocalDate.now().format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)),
             arrivalTime = LocalTime.now().plusMinutes(10).format(DateTimeFormatter.ofLocalizedTime(FormatStyle.MEDIUM)),
             orderStatus = OrderStatus.IN_PROGRESS.name,
-            paymentStatus = PaymentStatus.IN_PROGRESS.name
+            paymentStatus = PaymentStatus.IN_PROGRESS.name,
+            userFcmToken = user.fcmTokenOfCurrentLoggedInDevice
         )
     }
 
@@ -223,6 +223,10 @@ class OrderServiceImpl(
         val user = userService.getStreatsCustomer(userId)
 
         user.orders.add(order)
+
+        //        TODO : Refactor
+//        Clear cart items
+        val emptyCart = cartService.clearCart(userId)
 
         userService.updateStreatsCustomer(user)
 
