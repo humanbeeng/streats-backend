@@ -98,6 +98,6 @@ jobs:
         with:
           status: ${{ job.status }}
           fields: repo,message,commit,author,action,eventName,ref,workflow,job,took
-          text: ':tada: Deployment successful http://ecommtest2-env.eba-xp3s7pmc.ap-south-1.elasticbeanstalk.com/'
+          text: ':tada: Deployment successful http://streats-backend-prod.ap-south-1.elasticbeanstalk.com/'
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
