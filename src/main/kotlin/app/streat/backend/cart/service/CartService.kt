@@ -12,6 +12,6 @@ interface CartService {
 
     fun removeFromCart(userId: String, cartDTO: CartDTO): Cart
 
-    fun clearCart(userId: String): Cart
+    fun clearCart(userId: String)
 
 }

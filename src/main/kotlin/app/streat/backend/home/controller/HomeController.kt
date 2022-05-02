@@ -30,7 +30,7 @@ class HomeController(
             val home =
                 Home(username, featuredShops, shops)
             ResponseEntity.ok(home)
-        } catch (e: NoSuchElementException) {
+        } catch (e: Exception) {
             ResponseEntity.badRequest().build()
         }
     }

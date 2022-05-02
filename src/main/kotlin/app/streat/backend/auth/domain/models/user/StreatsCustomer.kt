@@ -1,8 +1,9 @@
-package app.streat.backend.auth.domain.usecase.models
+package app.streat.backend.auth.domain.models.user
 
 import app.streat.backend.cart.domain.models.Cart
 import app.streat.backend.order.domain.model.order.Order
 import org.springframework.data.annotation.Id
+import org.springframework.data.mongodb.core.geo.GeoJsonPoint
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.core.mapping.Field
 
@@ -10,6 +11,9 @@ import org.springframework.data.mongodb.core.mapping.Field
 data class StreatsCustomer(
     @Id
     val firebaseUID: String,
+    var fcmTokenOfCurrentLoggedInDevice: String = "",
+
+    var currentLocation: GeoJsonPoint,
 
     override val email: String,
     override val username: String,

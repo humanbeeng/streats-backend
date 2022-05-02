@@ -10,7 +10,8 @@ import org.springframework.stereotype.Service
 
 @Service
 class CartServiceImpl(
-    private val userService: StreatsUserService, private val shopService: ShopService
+    private val userService: StreatsUserService,
+    private val shopService: ShopService
 ) : CartService {
     override fun getUserCart(userId: String): Cart {
         val user = userService.getStreatsCustomer(userId)
@@ -108,14 +109,14 @@ class CartServiceImpl(
 
     }
 
-    override fun clearCart(userId: String): Cart {
+    override fun clearCart(userId: String) {
         val user = userService.getStreatsCustomer(userId)
         user.cart.cartItems = mutableMapOf()
         user.cart.totalCost = 0.00
         user.cart.itemCount = 0
         user.cart.shopId = ""
 
-        return userService.updateStreatsCustomer(user).cart
+        userService.updateStreatsCustomer(user)
 
     }
 
