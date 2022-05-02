@@ -1,99 +1,134 @@
 package app.streat.backend.auth.domain.usecase
 
-import app.streat.backend.auth.data.dto.AuthResponse
-import app.streat.backend.auth.domain.usecase.models.StreatsCustomer
+import app.streat.backend.auth.data.dto.LoginResponseDTO
+import app.streat.backend.auth.domain.models.auth_request.AuthRequest
+import app.streat.backend.auth.domain.models.login_request.LoginRequest
+import app.streat.backend.auth.domain.models.user.StreatsCustomer
 import app.streat.backend.auth.service.StreatsUserService
-import app.streat.backend.core.util.JWTUtil
 import app.streat.backend.cart.domain.models.Cart
+import app.streat.backend.core.util.JWTUtil
 import com.google.firebase.auth.FirebaseAuth
+import org.springframework.data.mongodb.core.geo.GeoJsonPoint
 import org.springframework.stereotype.Service
 
+/**
+ * TODO : Refactor this service by breaking out to different use cases
+ *
+ * 1. Authenticate
+ *
+ * 2. Login
+ */
 
 @Service
-class AuthenticateUser(private val service: StreatsUserService, private val jwtUtil: JWTUtil) {
+class AuthenticateUser(
+    private val userService: StreatsUserService,
+    private val jwtUtil: JWTUtil
+) {
 
 
-    fun authenticate(idToken: String): AuthResponse {
+    fun authenticate(authRequest: AuthRequest) {
 
-        return if (verifyUser(idToken)) {
+        val userId = jwtUtil.getUserId(authRequest.accessToken)
+        val user = userService.getStreatsCustomer(userId)
 
-            val streatsCustomer = createStreatsCustomerFromFirebaseToken(idToken)
 
-            if (checkUserExists(streatsCustomer.firebaseUID).not()) {
-                service.createStreatsCustomer(streatsCustomer)
-            }
+        user.currentLocation = authRequest.currentLocation
+        user.fcmTokenOfCurrentLoggedInDevice = authRequest.fcmToken
 
-            val accessToken = jwtUtil.createAccessToken(streatsCustomer)
-
-            AuthResponse(accessToken = accessToken, isVerified = true)
-
-        } else
-            AuthResponse(accessToken = "", false)
-
+        userService.updateStreatsCustomer(user)
     }
 
 
-    private fun verifyUser(idToken: String): Boolean {
-        return try {
-            FirebaseAuth.getInstance().verifyIdToken(idToken)
-            true
-        } catch (e: Exception) {
-            false
+fun login(loginRequest: LoginRequest): LoginResponseDTO {
+
+    return if (verifyUser(loginRequest.idToken)) {
+
+        val streatsCustomer = createStreatsCustomerFromFirebaseToken(loginRequest)
+
+        if (checkUserExists(streatsCustomer.firebaseUID).not()) {
+            userService.createStreatsCustomer(streatsCustomer)
+        } else {
+            userService.updateStreatsCustomer(streatsCustomer)
         }
+
+        val accessToken = jwtUtil.createAccessToken(streatsCustomer)
+
+        LoginResponseDTO(accessToken = accessToken, isVerified = true)
+
+    } else
+        LoginResponseDTO(accessToken = "", false)
+
+}
+
+
+private fun verifyUser(idToken: String): Boolean {
+    return try {
+        FirebaseAuth.getInstance().verifyIdToken(idToken)
+        true
+    } catch (e: Exception) {
+        false
     }
+}
 
-    private fun createStreatsCustomerFromFirebaseToken(idToken: String): StreatsCustomer {
-        val decodedToken = FirebaseAuth.getInstance().verifyIdToken(idToken)
-        val uid: String = decodedToken.uid
-        val name: String = decodedToken.name
-        val email: String = decodedToken.email
-        val profilePictureUrl = decodedToken.picture
-        return StreatsCustomer(
-            username = name,
-            email = email,
-            firebaseUID = uid,
-            profilePictureUrl = profilePictureUrl,
-            roles = listOf("USER"),
-            cart = Cart(),
-            orders = mutableListOf()
-        )
-    }
+private fun createStreatsCustomerFromFirebaseToken(loginRequest: LoginRequest): StreatsCustomer {
+    val decodedToken = FirebaseAuth.getInstance().verifyIdToken(loginRequest.idToken)
+    val uid: String = decodedToken.uid
+    val name: String = decodedToken.name
+    val email: String = decodedToken.email
+    val profilePictureUrl = decodedToken.picture
+    val currentLocation: GeoJsonPoint = loginRequest.currentLocation
+    val fcmTokenOfCurrentLoggedInDevice: String = loginRequest.fcmToken
+    return StreatsCustomer(
+        username = name,
+        email = email,
+        firebaseUID = uid,
+        profilePictureUrl = profilePictureUrl,
+        roles = listOf("USER"),
+        cart = Cart(),
+        orders = mutableListOf(),
+        fcmTokenOfCurrentLoggedInDevice = fcmTokenOfCurrentLoggedInDevice,
+        currentLocation = currentLocation
+    )
+}
 
-    private fun checkUserExists(uid: String): Boolean {
-        return service.checkUserExists(uid)
-    }
+private fun checkUserExists(uid: String): Boolean {
+    return userService.checkUserExists(uid)
+}
 
-    /**
-     * Delete this method, Using for testing -> Creating admin user
-     * Not using Firebase Server Side Verification
-     */
-
-    fun createAdminUser(idToken: String): AuthResponse {
-
-        val streatsAdmin = createStreatsAdminUserFromFirebaseToken(idToken)
-        val accessToken = jwtUtil.createAccessToken(streatsAdmin)
-
-        service.updateStreatsCustomer(streatsAdmin)
-        return AuthResponse(isVerified = true, accessToken = accessToken)
-    }
+/**
+ * Delete this method, Using for testing -> Creating admin user
+ * Not using Firebase Server Side Verification
+ */
 
 
-    private fun createStreatsAdminUserFromFirebaseToken(idToken: String): StreatsCustomer {
-        val decodedToken = FirebaseAuth.getInstance().verifyIdToken(idToken)
-        val uid: String = decodedToken.uid
-        val name: String = decodedToken.name
-        val email: String = decodedToken.email
-        val profilePictureUrl = decodedToken.picture
-        return StreatsCustomer(
-            username = name,
-            email = email,
-            firebaseUID = uid,
-            profilePictureUrl = profilePictureUrl,
-            roles = listOf("ADMIN"),
-            cart = Cart(),
-            orders = mutableListOf()
-        )
-    }
+fun createAdminUser(loginRequest: LoginRequest): LoginResponseDTO {
+
+    val streatsAdmin = createStreatsAdminUserFromFirebaseToken(loginRequest)
+    val accessToken = jwtUtil.createAccessToken(streatsAdmin)
+
+    userService.updateStreatsCustomer(streatsAdmin)
+    return LoginResponseDTO(isVerified = true, accessToken = accessToken)
+}
+
+
+private fun createStreatsAdminUserFromFirebaseToken(loginRequest: LoginRequest): StreatsCustomer {
+    val decodedToken = FirebaseAuth.getInstance().verifyIdToken(loginRequest.idToken)
+    val uid: String = decodedToken.uid
+    val name: String = decodedToken.name
+    val email: String = decodedToken.email
+    val profilePictureUrl = decodedToken.picture
+    return StreatsCustomer(
+        username = name,
+        email = email,
+        firebaseUID = uid,
+        profilePictureUrl = profilePictureUrl,
+        roles = listOf("ADMIN"),
+        cart = Cart(),
+        orders = mutableListOf(),
+        currentLocation = loginRequest.currentLocation,
+        fcmTokenOfCurrentLoggedInDevice = loginRequest.fcmToken
+    )
+}
 
 
 }
