@@ -31,8 +31,6 @@ class AuthConfig(
             .and()
             .authorizeRequests().mvcMatchers("/cart/**").hasRole("USER")
             .and()
-            .authorizeRequests().mvcMatchers("/auth/**").permitAll()
-            .and()
             .authorizeRequests().mvcMatchers("/vendor/**").hasAnyRole("ADMIN", "VENDOR")
     }
 }
