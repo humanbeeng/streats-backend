@@ -75,6 +75,7 @@ class AuthorizationFilter(private val jwtUtil: JWTUtil) : OncePerRequestFilter()
             "/orders/callback", "/auth/admin", "/images/background-blobs.svg",
             "/images/phone.svg",
             "/images/play-store.svg",
+            "/favicon.ico",
             "/"
         )
         return excludedRoutes.contains(route)
