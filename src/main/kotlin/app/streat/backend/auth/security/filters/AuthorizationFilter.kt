@@ -64,10 +64,19 @@ class AuthorizationFilter(private val jwtUtil: JWTUtil) : OncePerRequestFilter()
     }
 
     override fun shouldNotFilter(request: HttpServletRequest): Boolean {
-        return request.servletPath.equals("/auth/login")
-                || request.servletPath.equals("/orders/callback")
-                || request.servletPath.equals("/auth/admin")
+        return isRequestExcluded(request.servletPath)
 
+    }
 
+//    TODO : Refactor for static files
+    private fun isRequestExcluded(route: String): Boolean {
+        val excludedRoutes = listOf(
+            "/auth/login",
+            "/orders/callback", "/auth/admin", "/images/background-blobs.svg",
+            "/images/phone.svg",
+            "/images/play-store.svg",
+            "/"
+        )
+        return excludedRoutes.contains(route)
     }
 }
