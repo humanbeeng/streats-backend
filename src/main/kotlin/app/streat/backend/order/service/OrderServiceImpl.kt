@@ -212,27 +212,28 @@ class OrderServiceImpl(
         )
     }
 
+
+    /**
+     * Update Order Status
+     */
     private fun updateOrderStatus(orderId: String, paymentStatus: PaymentStatus) {
         val order = orderRepository.findOrderByOrderId(orderId)
         val userId = order.userId
 
-//        Update order status
         order.paymentStatus = paymentStatus.name
 
-//        Save updated order to User Profile
-        val user = userService.getStreatsCustomer(userId)
+        saveOrder(userId, order)
 
-        user.orders.add(order)
+        cartService.clearCart(userId)
 
-        //        TODO : Refactor
-//        Clear cart items
-        val emptyCart = cartService.clearCart(userId)
-
-        userService.updateStreatsCustomer(user)
-
-//        Save updated order in Order Collection
         orderRepository.save(order)
 
+    }
+
+    private fun saveOrder(userId: String, order: Order) {
+        val user = userService.getStreatsCustomer(userId)
+        user.orders.add(order)
+        userService.updateStreatsCustomer(user)
     }
 
 }
