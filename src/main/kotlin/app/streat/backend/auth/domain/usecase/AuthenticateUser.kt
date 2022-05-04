@@ -31,7 +31,7 @@ class AuthenticateUser(
     fun authenticate(authRequest: AuthRequest) {
 
         val userId = jwtUtil.getUserId(authRequest.accessToken)
-        if(userService.checkUserExists(userId)){
+        if (checkUserExists(userId)) {
             val user = userService.getStreatsCustomer(userId)
 
             user.currentLocation = authRequest.currentLocation
@@ -95,8 +95,8 @@ class AuthenticateUser(
         )
     }
 
-    private fun checkUserExists(uid: String): Boolean {
-        return userService.checkUserExists(uid)
+    private fun checkUserExists(userId: String): Boolean {
+        return userService.checkUserExists(userId)
     }
 
     /**
