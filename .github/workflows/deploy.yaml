@@ -1,4 +1,4 @@
-name: Build & Deploy
+name: Gradle Build & Deploy
 
 on:
   push:
@@ -11,8 +11,6 @@ on:
 env:
   #JAVA
   JAVA_VERSION: 11
-  #DOCKERHUB
-  DOCKER_HUB_USERNAME: humanbeeng
   #AWS & Elastic Beanstalk
   AWS_REGION: ap-south-1
   EB_ENVIRONMENT_NAME:  streats-backend-prod
@@ -51,7 +49,7 @@ jobs:
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
       - name: Gradle Clean Build and Push to Dockerhub
-        run: ./gradlew clean build jib -Djib.to.image=humanbeeng/streat-backend:${{steps.build-number.outputs.BUILD_NUMBER}}
+        run: ./gradlew clean build jib -Djib.to.image=humanbeeng/streats-backend:${{steps.build-number.outputs.BUILD_NUMBER}}
 
       - uses: 8398a7/action-slack@v3
         with:
@@ -65,7 +63,7 @@ jobs:
         run: |
           BUILD_NUMBER=${{steps.build-number.outputs.BUILD_NUMBER}}
           echo -e "Current elb/docker-compose.yaml\n$(cat elb/docker-compose.yaml)"
-          sed -i -E 's_(humanbeeng/streat-backend:)([^"]*)_\1'${BUILD_NUMBER}'_' elb/docker-compose.yaml 
+          sed -i -E 's_(humanbeeng/streats-backend:)([^"]*)_\1'${BUILD_NUMBER}'_' elb/docker-compose.yaml 
           echo -e "Current elb/docker-compose.yaml\n$(cat elb/docker-compose.yaml)"
           git config user.name github-actions
           git config user.email github-actions@github.com
@@ -81,7 +79,7 @@ jobs:
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }} # required
 
-      - name: Beanstalk Deploy
+      - name: Elastic Beanstalk Deploy
         uses: einaregilsson/beanstalk-deploy@ebe3476a4ce991d54336935e75e78dd9d86f9408
         with:
           aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
