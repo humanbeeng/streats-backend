@@ -14,7 +14,8 @@ class JWTUtil(jwtConfig: JWTConfig) {
 
     val jwtSigningKey: String = jwtConfig.signingKey
 
-
+    // TODO : Add expiry date to three month
+//    TODO : Shift all strings as constants
     fun createAccessToken(streatsCustomer: StreatsCustomer): String {
         val roles: MutableList<String> = mutableListOf()
 
