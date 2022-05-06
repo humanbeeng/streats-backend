@@ -6,6 +6,8 @@ import app.streat.backend.auth.domain.models.login_request.LoginRequest
 import app.streat.backend.auth.domain.models.user.StreatsCustomer
 import app.streat.backend.auth.service.StreatsUserService
 import app.streat.backend.auth.service.exceptions.AuthException
+import app.streat.backend.auth.utils.AuthConstants.ROLE_ADMIN
+import app.streat.backend.auth.utils.AuthConstants.ROLE_USER
 import app.streat.backend.cart.domain.models.Cart
 import app.streat.backend.core.util.Constants.EMPTY
 import app.streat.backend.core.util.JWTUtil
@@ -13,13 +15,6 @@ import com.google.firebase.auth.FirebaseAuth
 import org.springframework.data.mongodb.core.geo.GeoJsonPoint
 import org.springframework.stereotype.Service
 
-/**
- * TODO : Refactor this service by breaking out to different use cases
- *
- * 1. Authenticate
- *
- * 2. Login
- */
 
 @Service
 class AuthenticateUser(
@@ -38,7 +33,7 @@ class AuthenticateUser(
             user.fcmTokenOfCurrentLoggedInDevice = authRequest.fcmToken
 
             userService.updateStreatsCustomer(user)
-        } else throw AuthException.UserNotFoundException("User not found")
+        } else throw AuthException.UserNotFoundException
 
     }
 
@@ -87,7 +82,7 @@ class AuthenticateUser(
             email = email,
             firebaseUID = uid,
             profilePictureUrl = profilePictureUrl,
-            roles = listOf("USER"),
+            roles = listOf(ROLE_USER),
             cart = Cart(),
             orders = mutableListOf(),
             fcmTokenOfCurrentLoggedInDevice = fcmTokenOfCurrentLoggedInDevice,
@@ -115,6 +110,11 @@ class AuthenticateUser(
     }
 
 
+    /**
+     * Create Streats Admin User from Firebase Token
+     *
+     * Note : Admin may or may not have fcmToken
+     */
     private fun createStreatsAdminUserFromFirebaseToken(loginRequest: LoginRequest): StreatsCustomer {
         val decodedToken = FirebaseAuth.getInstance().verifyIdToken(loginRequest.idToken)
         val uid: String = decodedToken.uid
@@ -126,7 +126,7 @@ class AuthenticateUser(
             email = email,
             firebaseUID = uid,
             profilePictureUrl = profilePictureUrl,
-            roles = listOf("ADMIN"),
+            roles = listOf(ROLE_ADMIN),
             cart = Cart(),
             orders = mutableListOf(),
             currentLocation = loginRequest.currentLocation,
