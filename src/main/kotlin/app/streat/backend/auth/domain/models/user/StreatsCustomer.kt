@@ -1,7 +1,7 @@
 package app.streat.backend.auth.domain.models.user
 
 import app.streat.backend.cart.domain.models.Cart
-import app.streat.backend.core.util.Constants.EMPTY
+import app.streat.backend.core.util.CoreConstants.EMPTY
 import app.streat.backend.order.domain.model.order.Order
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.geo.GeoJsonPoint

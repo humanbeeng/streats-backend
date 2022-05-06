@@ -1,6 +1,6 @@
 package app.streat.backend.cart.domain.models
 
-import app.streat.backend.core.util.Constants.EMPTY
+import app.streat.backend.core.util.CoreConstants.EMPTY
 import javax.validation.constraints.Min
 
 data class Cart(

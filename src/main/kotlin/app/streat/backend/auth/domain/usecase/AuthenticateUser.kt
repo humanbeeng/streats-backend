@@ -9,7 +9,7 @@ import app.streat.backend.auth.service.exceptions.AuthException
 import app.streat.backend.auth.utils.AuthConstants.ROLE_ADMIN
 import app.streat.backend.auth.utils.AuthConstants.ROLE_USER
 import app.streat.backend.cart.domain.models.Cart
-import app.streat.backend.core.util.Constants.EMPTY
+import app.streat.backend.core.util.CoreConstants.EMPTY
 import app.streat.backend.core.util.JWTUtil
 import com.google.firebase.auth.FirebaseAuth
 import org.springframework.data.mongodb.core.geo.GeoJsonPoint
@@ -95,10 +95,8 @@ class AuthenticateUser(
     }
 
     /**
-     * Delete this method, Using for testing -> Creating admin user
-     * Not using Firebase Server Side Verification
+     * TODO : Delete this method, Using for testing -> Creating admin user Not using Firebase Server Side Verification
      */
-
 
     fun createAdminUser(loginRequest: LoginRequest): LoginResponseDTO {
 
