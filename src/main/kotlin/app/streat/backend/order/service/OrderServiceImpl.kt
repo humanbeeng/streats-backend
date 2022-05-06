@@ -39,6 +39,8 @@ import java.time.format.FormatStyle
 
 /**
  * TODO : 1. Wrap with try catch and introduce logging instead of spitting out on console
+ *
+ * TODO : 2. Add OrderExceptions while introducing logger
  */
 
 @Service
@@ -92,22 +94,6 @@ class OrderServiceImpl(
             status = tokenResponse.status
         )
 
-    }
-
-    //    TODO : Remove this method
-    override fun placeOrder(userId: String): Order {
-
-        val user = userService.getStreatsCustomer(userId)
-
-        val order = createOrder(userId)
-
-        if (user.orders.size > 2) {
-            user.orders.removeLast()
-        }
-        user.orders.add(order)
-        userService.updateStreatsCustomer(user)
-        cartService.clearCart(userId)
-        return order
     }
 
     /**
@@ -192,7 +178,7 @@ class OrderServiceImpl(
 
 //        TODO : Refactor orderCurrency and separate out request building to functions
         val cashfreeTokenRequestDTO =
-            CashfreeTokenRequestDTO(order.orderId, order.totalCost.toString(), orderCurrency = "INR")
+            CashfreeTokenRequestDTO(order.orderId, order.totalCost.toString(), orderCurrency = CURRENCY_RUPEES)
 
         val headers = HttpHeaders()
         headers.set(HEADER_CLIENT_ID, clientId)
@@ -215,7 +201,6 @@ class OrderServiceImpl(
 
     }
 
-    //   TODO : Extract these into constants
     private fun extractOrderPaymentVerificationRequestParams(
         orderPaymentVerificationRequestParams: LinkedHashMap<String, String>
     ): OrderPaymentVerificationRequest {

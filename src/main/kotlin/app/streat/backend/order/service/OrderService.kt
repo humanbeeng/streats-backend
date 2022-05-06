@@ -11,7 +11,5 @@ interface OrderService {
 
     fun verifyOrderPayment(orderPaymentVerificationRequestParams: LinkedHashMap<String, String>): Boolean
 
-    fun placeOrder(userId: String): Order
-
     fun deleteAllOrders(userId: String)
 }
