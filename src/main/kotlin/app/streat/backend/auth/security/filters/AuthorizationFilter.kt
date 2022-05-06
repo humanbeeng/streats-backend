@@ -68,15 +68,12 @@ class AuthorizationFilter(private val jwtUtil: JWTUtil) : OncePerRequestFilter()
 
     }
 
-//    TODO : Refactor for static files
+    //    TODO : Refactor for static files
     private fun isRequestExcluded(route: String): Boolean {
         val excludedRoutes = listOf(
             "/auth/login",
-            "/orders/callback", "/auth/admin", "/images/background-blobs.svg",
-            "/images/phone.svg",
-            "/images/play-store.svg",
-            "/favicon.ico",
-            "/"
+            "/orders/callback",
+            "/auth/admin"
         )
         return excludedRoutes.contains(route)
     }
