@@ -8,10 +8,6 @@ import app.streat.backend.order.service.OrderService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
-/**
- * TODO : Refactor placeOrder
- */
-
 
 @RestController
 @RequestMapping("/orders")
