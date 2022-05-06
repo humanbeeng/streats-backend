@@ -5,7 +5,7 @@ import app.streat.backend.cart.data.dto.CartDTO
 import app.streat.backend.cart.domain.models.Cart
 import app.streat.backend.cart.domain.models.CartItem
 import app.streat.backend.cart.service.exceptions.CartException
-import app.streat.backend.core.util.Constants.EMPTY
+import app.streat.backend.core.util.CoreConstants.EMPTY
 import app.streat.backend.shop.services.ShopService
 import org.springframework.stereotype.Service
 
@@ -43,15 +43,15 @@ class CartServiceImpl(
         val dishId = cartDTO.dishId
         val shopId = cartDTO.shopId
         val dishItem = shopService.getShopById(shopId).shopItems[dishId]
-            ?: throw CartException.ItemNotFoundFromShopException("No dish found from given shop ID")
+            ?: throw CartException.ItemNotFoundFromShopException
 
         if (isCartItemAddable(shopId, user.cart).not()) {
-            throw CartException.ItemFromDifferentShopException("Item from different shop")
+            throw CartException.ItemFromDifferentShopException
         } else {
 
             if (user.cart.cartItems.containsKey(dishId)) {
                 val cartItem = user.cart.cartItems[dishId]
-                    ?: throw CartException.ItemFetchFromCartException("Something went wrong while fetching cart items")
+                    ?: throw CartException.ItemFetchFromCartException
                 cartItem.quantity = cartItem.quantity.plus(1)
                 user.cart.cartItems[dishId] = cartItem
                 user.cart.totalCost = user.cart.totalCost + dishItem.price
@@ -98,11 +98,11 @@ class CartServiceImpl(
                     user.cart.cartItems.remove(dishId)
                 }
             } else {
-                throw CartException.ItemFetchFromCartException("No item present for given dishId")
+                throw CartException.ItemFetchFromCartException
             }
 
         } else {
-            throw CartException.ItemFetchFromCartException("No item present for given dishId")
+            throw CartException.ItemFetchFromCartException
         }
         user.cart.itemCount = user.cart.cartItems.size
         if (user.cart.itemCount == 0) {

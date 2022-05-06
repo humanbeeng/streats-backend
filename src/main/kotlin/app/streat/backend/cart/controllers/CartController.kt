@@ -4,6 +4,7 @@ import app.streat.backend.cart.data.dto.CartDTO
 import app.streat.backend.cart.domain.models.Cart
 import app.streat.backend.cart.service.CartService
 import app.streat.backend.core.util.JWTUtil
+import app.streat.backend.core.util.NetworkConstants.HEADER_AUTHORIZATION
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -17,7 +18,7 @@ class CartController(
 
     @GetMapping
     fun getCartItems(
-        @RequestHeader("Authorization") accessToken: String,
+        @RequestHeader(HEADER_AUTHORIZATION) accessToken: String,
     ): ResponseEntity<Cart> {
         return try {
             val userCart = cartService.getUserCart(jwtUtil.getUserId(accessToken))
@@ -32,7 +33,7 @@ class CartController(
 
     @PostMapping
     fun addToCart(
-        @RequestHeader("Authorization") accessToken: String,
+        @RequestHeader(HEADER_AUTHORIZATION) accessToken: String,
         @RequestBody cartDTO: CartDTO
     ): ResponseEntity<Cart> {
 
@@ -47,7 +48,7 @@ class CartController(
 
     @PostMapping("/remove")
     fun deleteCartItem(
-        @RequestHeader("Authorization") accessToken: String,
+        @RequestHeader(HEADER_AUTHORIZATION) accessToken: String,
         @RequestBody cartDTO: CartDTO
     ): ResponseEntity<Cart> {
         return try {
@@ -64,7 +65,9 @@ class CartController(
      */
 
     @GetMapping("/clear")
-    fun clearCart(@RequestHeader("Authorization") accessToken: String): ResponseEntity<String> {
+    fun clearCart(
+        @RequestHeader(HEADER_AUTHORIZATION) accessToken: String,
+    ): ResponseEntity<String> {
         return try {
             val userId = jwtUtil.getUserId(accessToken)
             cartService.clearCart(userId)

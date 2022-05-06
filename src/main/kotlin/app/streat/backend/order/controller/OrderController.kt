@@ -1,6 +1,7 @@
 package app.streat.backend.order.controller
 
 import app.streat.backend.core.util.JWTUtil
+import app.streat.backend.core.util.NetworkConstants.HEADER_AUTHORIZATION
 import app.streat.backend.order.domain.model.order.Order
 import app.streat.backend.order.domain.model.order.OrderWithToken
 import app.streat.backend.order.service.OrderService
@@ -22,7 +23,7 @@ class OrderController(
 
     @GetMapping("/initiate")
     fun initiateOrder(
-        @RequestHeader("Authorization") accessToken: String
+        @RequestHeader(HEADER_AUTHORIZATION) accessToken: String
     ): ResponseEntity<OrderWithToken> {
         return try {
             val userId = jwtUtil.getUserId(accessToken)
@@ -62,7 +63,7 @@ class OrderController(
 
     @GetMapping
     fun getAllOrders(
-        @RequestHeader("Authorization") accessToken: String
+        @RequestHeader(HEADER_AUTHORIZATION) accessToken: String
     ): ResponseEntity<List<Order>> {
 
         return try {
@@ -79,7 +80,7 @@ class OrderController(
      * Delete this service as it is used only for testing
      */
     @DeleteMapping
-    fun deleteAllOrders(@RequestHeader("Authorization") accessToken: String): ResponseEntity<String> {
+    fun deleteAllOrders(@RequestHeader(HEADER_AUTHORIZATION) accessToken: String): ResponseEntity<String> {
         return try {
             val userId = jwtUtil.getUserId(accessToken)
             orderService.deleteAllOrders(userId)

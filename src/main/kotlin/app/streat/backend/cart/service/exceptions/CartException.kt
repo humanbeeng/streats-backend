@@ -2,11 +2,11 @@ package app.streat.backend.cart.service.exceptions
 
 sealed class CartException(override val message: String) : Exception(message) {
 
-    class ItemFromDifferentShopException(override val message: String) : CartException(message)
+    object ItemFromDifferentShopException : CartException("Item from different shop")
 
-    class ItemNotFoundFromShopException(override val message: String) : CartException(message)
+    object ItemNotFoundFromShopException : CartException("No dish found from given shop ID")
 
-    class ItemFetchFromCartException(override val message: String) : CartException(message)
+    object ItemFetchFromCartException : CartException("Something went wrong while fetching cart items")
 
-    class EmptyCartException(override val message: String) : CartException(message)
+    object EmptyCartException : CartException("No items in cart")
 }

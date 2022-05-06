@@ -3,8 +3,21 @@ package app.streat.backend.order.service
 import app.streat.backend.auth.service.StreatsUserService
 import app.streat.backend.cart.service.CartService
 import app.streat.backend.cart.service.exceptions.CartException
+import app.streat.backend.cart.util.CartConstants.PARAM_ORDER_AMOUNT
+import app.streat.backend.cart.util.CartConstants.PARAM_ORDER_ID
+import app.streat.backend.cart.util.CartConstants.PARAM_PAYMENT_MODE
+import app.streat.backend.cart.util.CartConstants.PARAM_REFERENCE_ID
+import app.streat.backend.cart.util.CartConstants.PARAM_SIGNATURE
+import app.streat.backend.cart.util.CartConstants.PARAM_TRANSACTION_MESSAGE
+import app.streat.backend.cart.util.CartConstants.PARAM_TRANSACTION_STATUS
+import app.streat.backend.cart.util.CartConstants.PARAM_TRANSACTION_TIME
 import app.streat.backend.core.config.CashfreeConfig
+import app.streat.backend.core.util.CoreConstants.CASHFREE_STAGE_TEST
+import app.streat.backend.core.util.CoreConstants.CURRENCY_RUPEES
+import app.streat.backend.core.util.CoreConstants.EMPTY
 import app.streat.backend.core.util.Hmac256Util
+import app.streat.backend.core.util.NetworkConstants.HEADER_CLIENT_ID
+import app.streat.backend.core.util.NetworkConstants.HEADER_CLIENT_SECRET
 import app.streat.backend.order.data.dto.cashfree_token.CashfreeTokenRequestDTO
 import app.streat.backend.order.data.dto.cashfree_token.CashfreeTokenResponseDTO
 import app.streat.backend.order.data.dto.order_verification.OrderPaymentVerificationRequest
@@ -65,19 +78,23 @@ class OrderServiceImpl(
 
         val tokenResponse = getCftoken(tokenRequest)
 
+        val user = userService.getStreatsCustomer(userId)
+
         return OrderWithToken(
+            user.username,
+            user.email,
             tokenResponse.cftoken,
             order.orderId,
-            orderCurrency = "INR",
+            orderCurrency = CURRENCY_RUPEES,
             orderAmount = order.totalCost.toString(),
             appId = cashfreeConfig.clientId,
-            stage = "TEST",
+            stage = CASHFREE_STAGE_TEST,
             status = tokenResponse.status
         )
 
     }
 
-//    TODO : Remove this method
+    //    TODO : Remove this method
     override fun placeOrder(userId: String): Order {
 
         val user = userService.getStreatsCustomer(userId)
@@ -148,7 +165,7 @@ class OrderServiceImpl(
         val userCart = user.cart
 
         if (userCart.itemCount == 0) {
-            throw CartException.EmptyCartException("No items in cart to create order")
+            throw CartException.EmptyCartException
         }
         return Order(
             orderId = "STREATS_${userId}_${ObjectId()}",
@@ -178,8 +195,8 @@ class OrderServiceImpl(
             CashfreeTokenRequestDTO(order.orderId, order.totalCost.toString(), orderCurrency = "INR")
 
         val headers = HttpHeaders()
-        headers.set("x-client-id", clientId)
-        headers.set("x-client-secret", clientSecret)
+        headers.set(HEADER_CLIENT_ID, clientId)
+        headers.set(HEADER_CLIENT_SECRET, clientSecret)
 
         return HttpEntity(cashfreeTokenRequestDTO, headers)
 
@@ -198,18 +215,19 @@ class OrderServiceImpl(
 
     }
 
+    //   TODO : Extract these into constants
     private fun extractOrderPaymentVerificationRequestParams(
         orderPaymentVerificationRequestParams: LinkedHashMap<String, String>
     ): OrderPaymentVerificationRequest {
         return OrderPaymentVerificationRequest(
-            orderId = orderPaymentVerificationRequestParams["orderId"] ?: "",
-            orderAmount = orderPaymentVerificationRequestParams["orderAmount"] ?: "",
-            referenceId = orderPaymentVerificationRequestParams["referenceId"] ?: "",
-            txStatus = orderPaymentVerificationRequestParams["txStatus"] ?: "",
-            paymentMode = orderPaymentVerificationRequestParams["paymentMode"] ?: "",
-            txMsg = orderPaymentVerificationRequestParams["txMsg"] ?: "",
-            txTime = orderPaymentVerificationRequestParams["txTime"] ?: "",
-            signature = orderPaymentVerificationRequestParams["signature"] ?: ""
+            orderId = orderPaymentVerificationRequestParams[PARAM_ORDER_ID] ?: EMPTY,
+            orderAmount = orderPaymentVerificationRequestParams[PARAM_ORDER_AMOUNT] ?: EMPTY,
+            referenceId = orderPaymentVerificationRequestParams[PARAM_REFERENCE_ID] ?: EMPTY,
+            txStatus = orderPaymentVerificationRequestParams[PARAM_TRANSACTION_STATUS] ?: EMPTY,
+            paymentMode = orderPaymentVerificationRequestParams[PARAM_PAYMENT_MODE] ?: EMPTY,
+            txMsg = orderPaymentVerificationRequestParams[PARAM_TRANSACTION_MESSAGE] ?: EMPTY,
+            txTime = orderPaymentVerificationRequestParams[PARAM_TRANSACTION_TIME] ?: EMPTY,
+            signature = orderPaymentVerificationRequestParams[PARAM_SIGNATURE] ?: EMPTY
         )
     }
 
