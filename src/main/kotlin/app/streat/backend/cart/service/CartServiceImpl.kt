@@ -10,7 +10,6 @@ import app.streat.backend.shop.services.ShopService
 import org.springframework.stereotype.Service
 
 
-//TODO : Refactor Cart Exception
 @Service
 class CartServiceImpl(
     private val userService: StreatsUserService,
@@ -48,7 +47,6 @@ class CartServiceImpl(
         if (isCartItemAddable(shopId, user.cart).not()) {
             throw CartException.ItemFromDifferentShopException
         } else {
-
             if (user.cart.cartItems.containsKey(dishId)) {
                 val cartItem = user.cart.cartItems[dishId]
                     ?: throw CartException.ItemFetchFromCartException

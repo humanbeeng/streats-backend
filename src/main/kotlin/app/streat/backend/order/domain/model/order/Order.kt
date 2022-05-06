@@ -5,8 +5,7 @@ import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 
 /**
- * TODO : Match with client OrderDTO
- * TODO : Add shop device FCM Token
+ * TODO : Add vendor device FCM Token
  */
 
 @Document(collection = "orders")

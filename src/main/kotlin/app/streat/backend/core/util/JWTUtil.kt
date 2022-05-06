@@ -1,6 +1,10 @@
 package app.streat.backend.core.util
 
 import app.streat.backend.auth.domain.models.user.StreatsCustomer
+import app.streat.backend.auth.utils.AuthConstants.BEARER_PREFIX
+import app.streat.backend.auth.utils.AuthConstants.BEARER_STRING_LENGTH
+import app.streat.backend.auth.utils.AuthConstants.JWT_ISSUER
+import app.streat.backend.auth.utils.AuthConstants.PARAM_ROLES
 import app.streat.backend.core.config.JWTConfig
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
@@ -15,16 +19,15 @@ class JWTUtil(jwtConfig: JWTConfig) {
     val jwtSigningKey: String = jwtConfig.signingKey
 
     // TODO : Add expiry date to three month
-//    TODO : Shift all strings as constants
     fun createAccessToken(streatsCustomer: StreatsCustomer): String {
         val roles: MutableList<String> = mutableListOf()
 
         streatsCustomer.roles.forEach { role -> roles.add(role) }
 
         return JWT.create()
-            .withIssuer("Streats")
+            .withIssuer(JWT_ISSUER)
             .withSubject(streatsCustomer.firebaseUID)
-            .withClaim("roles", roles)
+            .withClaim(PARAM_ROLES, roles)
             .sign(Algorithm.HMAC256(jwtSigningKey))
     }
 
@@ -50,7 +53,7 @@ class JWTUtil(jwtConfig: JWTConfig) {
      */
     fun getUsername(authorizationHeader: String): String {
         return if (isAuthorizationHeaderValid(authorizationHeader)) {
-            val incomingAccessToken = authorizationHeader.substring("Bearer ".length)
+            val incomingAccessToken = authorizationHeader.substring(BEARER_STRING_LENGTH)
 
 
             val decodedToken = getDecodedToken(incomingAccessToken)
@@ -64,7 +67,7 @@ class JWTUtil(jwtConfig: JWTConfig) {
 
     fun getUserId(authorizationHeader: String): String {
         return if (isAuthorizationHeaderValid(authorizationHeader)) {
-            val incomingAccessToken = authorizationHeader.substring("Bearer ".length)
+            val incomingAccessToken = authorizationHeader.substring(BEARER_STRING_LENGTH)
 
 
             val decodedToken = getDecodedToken(incomingAccessToken)
@@ -77,7 +80,7 @@ class JWTUtil(jwtConfig: JWTConfig) {
     }
 
     private fun isAuthorizationHeaderValid(authorizationHeader: String): Boolean {
-        return authorizationHeader.isNotBlank() && authorizationHeader.startsWith("Bearer ")
+        return authorizationHeader.isNotBlank() && authorizationHeader.startsWith(BEARER_PREFIX)
     }
 
 
