@@ -5,9 +5,12 @@ import app.streat.backend.cart.data.dto.CartDTO
 import app.streat.backend.cart.domain.models.Cart
 import app.streat.backend.cart.domain.models.CartItem
 import app.streat.backend.cart.service.exceptions.CartException
+import app.streat.backend.core.util.Constants.EMPTY
 import app.streat.backend.shop.services.ShopService
 import org.springframework.stereotype.Service
 
+
+//TODO : Refactor Cart Exception
 @Service
 class CartServiceImpl(
     private val userService: StreatsUserService,
@@ -114,7 +117,7 @@ class CartServiceImpl(
         user.cart.cartItems = mutableMapOf()
         user.cart.totalCost = 0.00
         user.cart.itemCount = 0
-        user.cart.shopId = ""
+        user.cart.shopId = EMPTY
 
         userService.updateStreatsCustomer(user)
 
