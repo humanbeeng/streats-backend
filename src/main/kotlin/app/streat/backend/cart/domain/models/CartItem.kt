@@ -1,12 +1,15 @@
 package app.streat.backend.cart.domain.models
 
-import org.springframework.data.mongodb.core.mapping.Field
+import javax.validation.constraints.Min
+import javax.validation.constraints.NotBlank
 
 data class CartItem(
-    @Field("shop_id")
+    @NotBlank
     val shopId: String,
-    @Field("item_name")
+    @NotBlank
     val itemName: String,
+    @Min(0)
     var quantity: Int = 0,
+    @Min(0)
     val price: Double
 )

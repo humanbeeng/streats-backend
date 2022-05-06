@@ -1,10 +1,13 @@
 version: "3.8"
 services:
   backend:
-    image: "humanbeeng/streat-backend:3.5.2022.15.59.54"
+    image: "humanbeeng/streats-backend:4.5.2022.16.18.14"
+    
     ports:
       - "80:8080"
+    
     restart: "always"
+    
     environment:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
       SPRING_DATA_MONGODB_URI: ${SPRING_DATA_MONGODB_URI}

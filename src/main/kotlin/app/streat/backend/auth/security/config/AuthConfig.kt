@@ -2,6 +2,9 @@ package app.streat.backend.auth.security.config
 
 import app.streat.backend.auth.security.filters.AuthorizationFilter
 import app.streat.backend.auth.service.StreatsUserService
+import app.streat.backend.auth.utils.AuthConstants.ROLE_ADMIN
+import app.streat.backend.auth.utils.AuthConstants.ROLE_USER
+import app.streat.backend.auth.utils.AuthConstants.ROLE_VENDOR
 import app.streat.backend.core.util.JWTUtil
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder
@@ -25,12 +28,12 @@ class AuthConfig(
         http.cors().disable()
         http.csrf().disable()
         http.addFilterBefore(AuthorizationFilter(jwtUtil), BasicAuthenticationFilter::class.java)
-            .authorizeRequests().mvcMatchers("/admin/**").hasRole("ADMIN")
+            .authorizeRequests().mvcMatchers("/admin/**").hasRole(ROLE_ADMIN)
             .and()
-            .authorizeRequests().mvcMatchers("/shop/**").hasAnyRole("USER", "ADMIN")
+            .authorizeRequests().mvcMatchers("/shop/**").hasAnyRole(ROLE_VENDOR, ROLE_ADMIN)
             .and()
-            .authorizeRequests().mvcMatchers("/cart/**").hasRole("USER")
+            .authorizeRequests().mvcMatchers("/cart/**").hasAnyRole(ROLE_ADMIN, ROLE_USER)
             .and()
-            .authorizeRequests().mvcMatchers("/vendor/**").hasAnyRole("ADMIN", "VENDOR")
+            .authorizeRequests().mvcMatchers("/vendor/**").hasAnyRole(ROLE_ADMIN, ROLE_VENDOR)
     }
 }
