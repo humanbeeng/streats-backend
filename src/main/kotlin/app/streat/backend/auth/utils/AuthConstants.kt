@@ -12,7 +12,7 @@ object AuthConstants {
 
     const val PARAM_ROLES = "roles"
 
-    const val BEARER_STRING_LENGTH = 8
+    const val BEARER_STRING_LENGTH = 7
 
     const val BEARER_PREFIX = "Bearer "
 }
