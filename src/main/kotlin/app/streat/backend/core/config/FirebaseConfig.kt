@@ -3,6 +3,8 @@ package app.streat.backend.core.config
 import com.google.auth.oauth2.GoogleCredentials
 import com.google.firebase.FirebaseApp
 import com.google.firebase.FirebaseOptions
+import com.google.firebase.messaging.FirebaseMessaging
+import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.io.ResourceLoader
 import java.io.IOException
@@ -24,4 +26,11 @@ class FirebaseConfig(private val resourceLoader: ResourceLoader) {
             throw e
         }
     }
+
+    @Bean
+    fun firebaseMessagingInit(): FirebaseMessaging {
+        return FirebaseMessaging.getInstance()
+    }
+
+
 }

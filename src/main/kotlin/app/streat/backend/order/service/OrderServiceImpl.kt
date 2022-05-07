@@ -18,6 +18,7 @@ import app.streat.backend.core.util.CoreConstants.EMPTY
 import app.streat.backend.core.util.Hmac256Util
 import app.streat.backend.core.util.NetworkConstants.HEADER_CLIENT_ID
 import app.streat.backend.core.util.NetworkConstants.HEADER_CLIENT_SECRET
+import app.streat.backend.notification.service.NotificationService
 import app.streat.backend.order.data.dto.cashfree_token.CashfreeTokenRequestDTO
 import app.streat.backend.order.data.dto.cashfree_token.CashfreeTokenResponseDTO
 import app.streat.backend.order.data.dto.order_verification.OrderPaymentVerificationRequest
@@ -49,7 +50,8 @@ class OrderServiceImpl(
     private val cartService: CartService,
     private val cashfreeConfig: CashfreeConfig,
     private val hmac256Util: Hmac256Util,
-    private val orderRepository: OrderRepository
+    private val orderRepository: OrderRepository,
+    private val notificationService: NotificationService
 ) : OrderService {
     override fun getAllOrders(userId: String): List<Order> {
 
@@ -138,13 +140,16 @@ class OrderServiceImpl(
         val orderId: String = paymentVerificationData.orderId
 
         if (isSignatureValid) {
-            updateOrderStatus(orderId, PaymentStatus.SUCCESS)
+            val updatedOrder = updateOrderStatus(orderId, PaymentStatus.SUCCESS)
+            notificationService.notifyUser(updatedOrder)
+            notificationService.notifyVendor(updatedOrder)
         } else {
             updateOrderStatus(orderId, PaymentStatus.FAILURE)
-        }
 
+        }
         return isSignatureValid
     }
+
 
     private fun createOrder(userId: String): Order {
         val user = userService.getStreatsCustomer(userId)
@@ -167,6 +172,47 @@ class OrderServiceImpl(
             orderStatus = OrderStatus.IN_PROGRESS.name,
             paymentStatus = PaymentStatus.IN_PROGRESS.name,
             userFcmToken = user.fcmTokenOfCurrentLoggedInDevice
+        )
+    }
+
+
+    /**
+     * Update Order Status
+     */
+    private fun updateOrderStatus(orderId: String, paymentStatus: PaymentStatus): Order {
+        val order = orderRepository.findOrderByOrderId(orderId)
+        val userId = order.userId
+
+        order.paymentStatus = paymentStatus.name
+
+        pushToUserOrderHistory(userId, order)
+
+        cartService.clearCart(userId)
+
+        orderRepository.save(order)
+
+        return order
+
+    }
+
+    private fun pushToUserOrderHistory(userId: String, order: Order) {
+        val user = userService.getStreatsCustomer(userId)
+        user.orders.add(order)
+        userService.updateStreatsCustomer(user)
+    }
+
+    private fun extractOrderPaymentVerificationRequestParams(
+        orderPaymentVerificationRequestParams: LinkedHashMap<String, String>
+    ): OrderPaymentVerificationRequest {
+        return OrderPaymentVerificationRequest(
+            orderId = orderPaymentVerificationRequestParams[PARAM_ORDER_ID] ?: EMPTY,
+            orderAmount = orderPaymentVerificationRequestParams[PARAM_ORDER_AMOUNT] ?: EMPTY,
+            referenceId = orderPaymentVerificationRequestParams[PARAM_REFERENCE_ID] ?: EMPTY,
+            txStatus = orderPaymentVerificationRequestParams[PARAM_TRANSACTION_STATUS] ?: EMPTY,
+            paymentMode = orderPaymentVerificationRequestParams[PARAM_PAYMENT_MODE] ?: EMPTY,
+            txMsg = orderPaymentVerificationRequestParams[PARAM_TRANSACTION_MESSAGE] ?: EMPTY,
+            txTime = orderPaymentVerificationRequestParams[PARAM_TRANSACTION_TIME] ?: EMPTY,
+            signature = orderPaymentVerificationRequestParams[PARAM_SIGNATURE] ?: EMPTY
         )
     }
 
@@ -200,44 +246,4 @@ class OrderServiceImpl(
         } else throw Exception("Something went wrong while fetching cftoken ")
 
     }
-
-    private fun extractOrderPaymentVerificationRequestParams(
-        orderPaymentVerificationRequestParams: LinkedHashMap<String, String>
-    ): OrderPaymentVerificationRequest {
-        return OrderPaymentVerificationRequest(
-            orderId = orderPaymentVerificationRequestParams[PARAM_ORDER_ID] ?: EMPTY,
-            orderAmount = orderPaymentVerificationRequestParams[PARAM_ORDER_AMOUNT] ?: EMPTY,
-            referenceId = orderPaymentVerificationRequestParams[PARAM_REFERENCE_ID] ?: EMPTY,
-            txStatus = orderPaymentVerificationRequestParams[PARAM_TRANSACTION_STATUS] ?: EMPTY,
-            paymentMode = orderPaymentVerificationRequestParams[PARAM_PAYMENT_MODE] ?: EMPTY,
-            txMsg = orderPaymentVerificationRequestParams[PARAM_TRANSACTION_MESSAGE] ?: EMPTY,
-            txTime = orderPaymentVerificationRequestParams[PARAM_TRANSACTION_TIME] ?: EMPTY,
-            signature = orderPaymentVerificationRequestParams[PARAM_SIGNATURE] ?: EMPTY
-        )
-    }
-
-
-    /**
-     * Update Order Status
-     */
-    private fun updateOrderStatus(orderId: String, paymentStatus: PaymentStatus) {
-        val order = orderRepository.findOrderByOrderId(orderId)
-        val userId = order.userId
-
-        order.paymentStatus = paymentStatus.name
-
-        saveOrder(userId, order)
-
-        cartService.clearCart(userId)
-
-        orderRepository.save(order)
-
-    }
-
-    private fun saveOrder(userId: String, order: Order) {
-        val user = userService.getStreatsCustomer(userId)
-        user.orders.add(order)
-        userService.updateStreatsCustomer(user)
-    }
-
 }
