@@ -21,7 +21,7 @@ class CartController(
         @RequestHeader(HEADER_AUTHORIZATION) accessToken: String,
     ): ResponseEntity<Cart> {
         return try {
-            val userCart = cartService.getUserCart(jwtUtil.getUserId(accessToken))
+            val userCart = cartService.getUserCart(jwtUtil.getId(accessToken))
             ResponseEntity.ok(userCart)
         } catch (e: Exception) {
             return ResponseEntity.badRequest().build()
@@ -38,7 +38,7 @@ class CartController(
     ): ResponseEntity<Cart> {
 
         return try {
-            val updatedCart = cartService.addToCart(jwtUtil.getUserId(accessToken), cartDTO)
+            val updatedCart = cartService.addToCart(jwtUtil.getId(accessToken), cartDTO)
             ResponseEntity.ok(updatedCart)
         } catch (e: Exception) {
             ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).build()
@@ -52,28 +52,11 @@ class CartController(
         @RequestBody cartDTO: CartDTO
     ): ResponseEntity<Cart> {
         return try {
-            val userId = jwtUtil.getUserId(accessToken)
+            val userId = jwtUtil.getId(accessToken)
             val updatedCart = cartService.removeFromCart(userId, cartDTO)
             ResponseEntity.ok(updatedCart)
         } catch (e: Exception) {
             ResponseEntity.badRequest().build()
-        }
-    }
-
-    /**
-     * TODO : Remove this controller since we wont be calling this from client
-     */
-
-    @GetMapping("/clear")
-    fun clearCart(
-        @RequestHeader(HEADER_AUTHORIZATION) accessToken: String,
-    ): ResponseEntity<String> {
-        return try {
-            val userId = jwtUtil.getUserId(accessToken)
-            cartService.clearCart(userId)
-            ResponseEntity.ok("Cart cleared")
-        } catch (e: Exception) {
-            ResponseEntity.internalServerError().build()
         }
     }
 

@@ -72,7 +72,8 @@ class AuthorizationFilter(private val jwtUtil: JWTUtil) : OncePerRequestFilter()
         val excludedRoutes = listOf(
             "/auth/login",
             "/orders/callback",
-            "/auth/admin"
+            "/auth/admin",
+            "/vendor/login"
         )
         return excludedRoutes.contains(route)
     }

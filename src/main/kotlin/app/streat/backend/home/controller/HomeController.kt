@@ -22,8 +22,8 @@ class HomeController(
     @GetMapping
     fun home(@RequestHeader("Authorization") accessToken: String): ResponseEntity<Home> {
         return try {
-            val userId = jwtUtil.getUserId(accessToken)
-            val username = userService.getStreatsCustomer(userId).username
+            val userId = jwtUtil.getId(accessToken)
+            val username = userService.getStreatsCustomerById(userId).username
 
             val featuredShops = shopService.getFeaturedShops()
             val shops = shopService.getAllShops()

@@ -5,7 +5,6 @@ import app.streat.backend.cart.data.dto.CartDTO
 import app.streat.backend.cart.domain.models.Cart
 import app.streat.backend.cart.domain.models.CartItem
 import app.streat.backend.cart.service.exceptions.CartException
-import app.streat.backend.core.util.CoreConstants.EMPTY
 import app.streat.backend.shop.services.ShopService
 import org.springframework.stereotype.Service
 
@@ -16,7 +15,7 @@ class CartServiceImpl(
     private val shopService: ShopService
 ) : CartService {
     override fun getUserCart(userId: String): Cart {
-        val user = userService.getStreatsCustomer(userId)
+        val user = userService.getStreatsCustomerById(userId)
         return user.cart
     }
 
@@ -38,7 +37,7 @@ class CartServiceImpl(
      *
      */
     override fun addToCart(userId: String, cartDTO: CartDTO): Cart {
-        val user = userService.getStreatsCustomer(userId)
+        val user = userService.getStreatsCustomerById(userId)
         val dishId = cartDTO.dishId
         val shopId = cartDTO.shopId
         val dishItem = shopService.getShopById(shopId).shopItems[dishId]
@@ -85,7 +84,7 @@ class CartServiceImpl(
     override fun removeFromCart(userId: String, cartDTO: CartDTO): Cart {
         val dishId = cartDTO.dishId
 
-        val user = userService.getStreatsCustomer(userId)
+        val user = userService.getStreatsCustomerById(userId)
 
         if (user.cart.cartItems.containsKey(dishId)) {
             val cartItem = user.cart.cartItems[dishId]
@@ -110,16 +109,6 @@ class CartServiceImpl(
 
     }
 
-    override fun clearCart(userId: String) {
-        val user = userService.getStreatsCustomer(userId)
-        user.cart.cartItems = mutableMapOf()
-        user.cart.totalCost = 0.00
-        user.cart.itemCount = 0
-        user.cart.shopId = EMPTY
-
-        userService.updateStreatsCustomer(user)
-
-    }
 
     private fun isCartItemFromDifferentShop(shopId: String, cart: Cart): Boolean {
         return shopId == cart.shopId && cart.shopId.isNotBlank()

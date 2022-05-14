@@ -1,4 +1,4 @@
-name: Gradle Build & Deploy
+name: Deploy to Prod
 
 on:
   push:
@@ -13,7 +13,7 @@ env:
   JAVA_VERSION: 11
   #AWS & Elastic Beanstalk
   AWS_REGION: ap-south-1
-  EB_ENVIRONMENT_NAME:  streats-backend-prod
+  EB_ENVIRONMENT_NAME: streats-backend-prod
   EB_APPLICATION_NAME: streats-backend
   EB_DEPLOYMENT_PACKAGE: elb/docker-compose.yaml
 
@@ -26,7 +26,7 @@ jobs:
         with:
           status: ${{ job.status }}
           fields: repo,message,commit,author,action,eventName,ref,workflow,job,took,pullRequest # selectable (default: repo,message)
-          text: "CICD : In-progress :eyes:"
+          text: "CICD - Prod: In-progress :eyes:"
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }} # required
         if: always() # Pick up events even if the job fails or is canceled.

@@ -24,16 +24,22 @@ class AuthConfig(
         auth.userDetailsService(streatsUserService)
     }
 
+    //    TODO : Restore ROLES
+//    TODO : Remove Test
     override fun configure(http: HttpSecurity) {
         http.cors().disable()
         http.csrf().disable()
         http.addFilterBefore(AuthorizationFilter(jwtUtil), BasicAuthenticationFilter::class.java)
             .authorizeRequests().mvcMatchers("/admin/**").hasRole(ROLE_ADMIN)
             .and()
-            .authorizeRequests().mvcMatchers("/shop/**").hasAnyRole(ROLE_VENDOR, ROLE_ADMIN)
+            .authorizeRequests().mvcMatchers("/shop/**").hasAnyRole(ROLE_USER, ROLE_VENDOR, ROLE_ADMIN)
             .and()
             .authorizeRequests().mvcMatchers("/cart/**").hasAnyRole(ROLE_ADMIN, ROLE_USER)
             .and()
+            .authorizeRequests().mvcMatchers("/vendor/login").permitAll()
+            .and()
             .authorizeRequests().mvcMatchers("/vendor/**").hasAnyRole(ROLE_ADMIN, ROLE_VENDOR)
+            .and()
+            .authorizeRequests().mvcMatchers("/test/**").hasAnyRole(ROLE_USER, ROLE_ADMIN, ROLE_VENDOR)
     }
 }

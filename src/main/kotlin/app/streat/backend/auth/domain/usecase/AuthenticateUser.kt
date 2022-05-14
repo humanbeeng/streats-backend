@@ -25,9 +25,9 @@ class AuthenticateUser(
 
     fun authenticate(authRequest: AuthRequest) {
 
-        val userId = jwtUtil.getUserId(authRequest.accessToken)
+        val userId = jwtUtil.getId(authRequest.accessToken)
         if (checkUserExists(userId)) {
-            val user = userService.getStreatsCustomer(userId)
+            val user = userService.getStreatsCustomerById(userId)
 
             user.currentLocation = authRequest.currentLocation
             user.fcmTokenOfCurrentLoggedInDevice = authRequest.fcmToken

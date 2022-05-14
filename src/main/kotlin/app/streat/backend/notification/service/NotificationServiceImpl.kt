@@ -16,7 +16,6 @@ class NotificationServiceImpl(
     override fun sendPushNotification(fcmToken: String, message: Message): Boolean {
 
         return try {
-
             firebaseMessaging.send(message)
             true
         } catch (e: Exception) {
@@ -24,7 +23,7 @@ class NotificationServiceImpl(
         }
     }
 
-    override fun notifyUser(order: Order): Boolean {
+    override fun notifyOrderToUser(order: Order): Boolean {
 
         return try {
             val message = Message.builder().setToken(order.userFcmToken).setNotification(
@@ -41,8 +40,19 @@ class NotificationServiceImpl(
 
     }
 
-    override fun notifyVendor(order: Order): Boolean {
-//        TODO : Add notify vendor
-        return true
+    //    TODO : Refactor this
+    override fun notifyOrderToVendor(order: Order): Boolean {
+        return try {
+            val message = Message.builder().setToken(order.vendorFcmToken).setNotification(
+                Notification.builder().setTitle(JWT_ISSUER).setBody("New order has been placed!").build()
+            ).build()
+
+            sendPushNotification(order.vendorFcmToken, message)
+
+            true
+
+        } catch (e: Exception) {
+            false
+        }
     }
 }

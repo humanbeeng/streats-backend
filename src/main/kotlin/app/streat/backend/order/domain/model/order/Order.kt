@@ -1,6 +1,7 @@
 package app.streat.backend.order.domain.model.order
 
 import app.streat.backend.cart.domain.models.CartItem
+import app.streat.backend.core.util.CoreConstants.EMPTY
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 
@@ -15,6 +16,7 @@ data class Order(
     val shopId: String,
     val userId: String,
     val userFcmToken: String,
+    val vendorFcmToken: String = EMPTY,
 
     val username: String,
     val itemCount: Int,

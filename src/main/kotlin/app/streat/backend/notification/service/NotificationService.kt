@@ -10,8 +10,8 @@ interface NotificationService {
 
     fun sendPushNotification(fcmToken: String, message: Message): Boolean
 
-    fun notifyUser(order: Order): Boolean
+    fun notifyOrderToUser(order: Order): Boolean
 
-    fun notifyVendor(order: Order): Boolean
+    fun notifyOrderToVendor(order: Order): Boolean
 
 }

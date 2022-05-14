@@ -1,5 +1,7 @@
 package app.streat.backend.shop.domain.models
 
+import app.streat.backend.core.util.CoreConstants.EMPTY
+import app.streat.backend.order.domain.model.order.Order
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.geo.GeoJsonPoint
 import org.springframework.data.mongodb.core.index.GeoSpatialIndexType
@@ -13,6 +15,8 @@ data class StreatsShop(
 
     val shopName: String,
 
+    val vendorId: String = EMPTY,
+
     val shopOwnerPhoneNumber: String,
 
     @GeoSpatialIndexed(type = GeoSpatialIndexType.GEO_2DSPHERE)
@@ -25,8 +29,10 @@ data class StreatsShop(
 
     val isTakeawaySupported: Boolean,
 
-    val isShopOpen: Boolean,
+    var isShopOpen: Boolean,
 
-    val featured: Boolean = false
+    val featured: Boolean = false,
+
+    val ongoingOrders: MutableList<Order> = emptyList<Order>().toMutableList()
 )
 
