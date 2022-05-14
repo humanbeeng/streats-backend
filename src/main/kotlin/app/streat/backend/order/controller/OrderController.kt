@@ -22,7 +22,7 @@ class OrderController(
         @RequestHeader(HEADER_AUTHORIZATION) accessToken: String
     ): ResponseEntity<OrderWithToken> {
         return try {
-            val userId = jwtUtil.getUserId(accessToken)
+            val userId = jwtUtil.getId(accessToken)
             ResponseEntity.ok(orderService.initiateOrder(userId))
 
         } catch (e: Exception) {
@@ -44,7 +44,7 @@ class OrderController(
 
         return try {
             if (orderPaymentVerificationRequest.isEmpty().not() &&
-                orderService.verifyOrderPayment(orderPaymentVerificationRequest)
+                orderService.verifyOrderPaymentAndPlaceOrder(orderPaymentVerificationRequest)
             ) {
                 ResponseEntity.ok().build()
             } else {
@@ -63,7 +63,7 @@ class OrderController(
     ): ResponseEntity<List<Order>> {
 
         return try {
-            val userId = jwtUtil.getUserId(accessToken)
+            val userId = jwtUtil.getId(accessToken)
             ResponseEntity.ok(orderService.getAllOrders(userId))
         } catch (e: Exception) {
             ResponseEntity.internalServerError().build()
@@ -78,7 +78,7 @@ class OrderController(
     @DeleteMapping
     fun deleteAllOrders(@RequestHeader(HEADER_AUTHORIZATION) accessToken: String): ResponseEntity<String> {
         return try {
-            val userId = jwtUtil.getUserId(accessToken)
+            val userId = jwtUtil.getId(accessToken)
             orderService.deleteAllOrders(userId)
             ResponseEntity.ok("Cleared all orders")
         } catch (e: Exception) {
