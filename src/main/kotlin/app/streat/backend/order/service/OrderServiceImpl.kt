@@ -1,7 +1,6 @@
 package app.streat.backend.order.service
 
 import app.streat.backend.auth.service.StreatsUserService
-import app.streat.backend.cart.service.CartService
 import app.streat.backend.cart.service.exceptions.CartException
 import app.streat.backend.cart.util.CartConstants.PARAM_ORDER_AMOUNT
 import app.streat.backend.cart.util.CartConstants.PARAM_ORDER_ID
@@ -27,6 +26,8 @@ import app.streat.backend.order.domain.model.order.Order
 import app.streat.backend.order.domain.model.order.OrderWithToken
 import app.streat.backend.order.domain.model.status.OrderStatus
 import app.streat.backend.order.domain.model.status.PaymentStatus
+import app.streat.backend.shop.data.repositories.StreatsShopRepository
+import app.streat.backend.vendor.service.auth.StreatsVendorService
 import org.bson.types.ObjectId
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
@@ -47,18 +48,27 @@ import java.time.format.FormatStyle
 @Service
 class OrderServiceImpl(
     private val userService: StreatsUserService,
-    private val cartService: CartService,
     private val cashfreeConfig: CashfreeConfig,
     private val hmac256Util: Hmac256Util,
     private val orderRepository: OrderRepository,
-    private val notificationService: NotificationService
+    private val notificationService: NotificationService,
+    private val shopRepository: StreatsShopRepository,
+    private val streatsVendorService: StreatsVendorService
 ) : OrderService {
-    override fun getAllOrders(userId: String): List<Order> {
 
-        val user = userService.getStreatsCustomer(userId)
-        return user.orders
-
+    override fun findOrderByOrderId(orderId: String): Order {
+        return try {
+            orderRepository.findOrderByOrderId(orderId)
+        } catch (e: Exception) {
+            throw NoSuchElementException("Order with given orderId not found")
+        }
     }
+
+    override fun getAllOrders(userId: String): List<Order> {
+        val user = userService.getStreatsCustomerById(userId)
+        return user.orders
+    }
+
 
     /**
      * Initiate Order
@@ -76,13 +86,13 @@ class OrderServiceImpl(
 
         val order = createOrder(userId)
 
-        orderRepository.save(order)
+        addOrderToOrderRepo(order)
 
         val tokenRequest = createTokenRequest(order)
 
         val tokenResponse = getCftoken(tokenRequest)
 
-        val user = userService.getStreatsCustomer(userId)
+        val user = userService.getStreatsCustomerById(userId)
 
         return OrderWithToken(
             user.username,
@@ -102,9 +112,22 @@ class OrderServiceImpl(
      * TODO : Delete this method or move to Admin service
      */
     override fun deleteAllOrders(userId: String) {
-        val user = userService.getStreatsCustomer(userId)
+        val user = userService.getStreatsCustomerById(userId)
         user.orders.removeAll(user.orders)
         userService.updateStreatsCustomer(user)
+    }
+
+    private fun addOrderToOrderRepo(order: Order): Order {
+        if (orderRepository.existsById(order.orderId)) {
+            throw Exception("Order already exists")
+        }
+        return orderRepository.save(order)
+    }
+
+    override fun updateOrderStatusInOrderRepo(orderId: String, orderStatus: OrderStatus): Order {
+        val order = findOrderByOrderId(orderId)
+        order.orderStatus = orderStatus.name
+        return orderRepository.save(order)
     }
 
 
@@ -123,38 +146,72 @@ class OrderServiceImpl(
      *
      * Step 4: If the signatures are valid, then update orderPaymentStatus and orderVerificationStatus flags to SUCCESS.
      * If signature are invalid, then set to FAILURE
+     *
+     * TODO : Add fallback if any of the steps failed.
      */
-    override fun verifyOrderPayment(orderPaymentVerificationRequestParams: LinkedHashMap<String, String>): Boolean {
+    override fun verifyOrderPaymentAndPlaceOrder(orderPaymentVerificationRequestParams: LinkedHashMap<String, String>): Boolean {
         val paymentVerificationData =
             extractOrderPaymentVerificationRequestParams(orderPaymentVerificationRequestParams)
 
 
-        val isSignatureValid =
-            hmac256Util.verifySignature(
-                paymentVerificationData.getDataString(),
-                paymentVerificationData.signature,
-                cashfreeConfig.clientSecret
-            )
+        val isSignatureValid = hmac256Util.verifySignature(
+            paymentVerificationData.getDataString(), paymentVerificationData.signature, cashfreeConfig.clientSecret
+        )
 
-//        Update OrderDB about success or failure
         val orderId: String = paymentVerificationData.orderId
 
-        if (isSignatureValid) {
-            val updatedOrder = updateOrderStatus(orderId, PaymentStatus.SUCCESS)
-            notificationService.notifyUser(updatedOrder)
-            notificationService.notifyVendor(updatedOrder)
-        } else {
-            updateOrderStatus(orderId, PaymentStatus.FAILURE)
+        return if (isSignatureValid) {
+            placeOrder(orderId)
 
+        } else {
+            failOrder(orderId)
         }
-        return isSignatureValid
+
     }
 
 
+    //    TODO : Add concurrency patterns
+    private fun placeOrder(orderId: String): Boolean {
+        return try {
+            val paymentSuccessOrder = updatePaymentStatusInOrderRepo(orderId, PaymentStatus.SUCCESS)
+
+            userService.clearCart(paymentSuccessOrder.userId)
+
+            pushToUserOrderHistory(paymentSuccessOrder)
+
+            addNewOrderToOngoingOrdersList(paymentSuccessOrder)
+
+            notificationService.notifyOrderToUser(paymentSuccessOrder)
+
+            notificationService.notifyOrderToVendor(paymentSuccessOrder)
+        } catch (e: Exception) {
+            false
+        }
+
+    }
+
+    private fun failOrder(orderId: String): Boolean {
+        return try {
+            val paymentFailedOrder = updatePaymentStatusInOrderRepo(orderId, PaymentStatus.FAILURE)
+            pushToUserOrderHistory(paymentFailedOrder)
+            notificationService.notifyOrderToUser(paymentFailedOrder)
+        } catch (e: Exception) {
+            false
+        }
+
+    }
+
     private fun createOrder(userId: String): Order {
-        val user = userService.getStreatsCustomer(userId)
+        val user = userService.getStreatsCustomerById(userId)
         val userCart = user.cart
 
+        val shopId = userCart.shopId
+        val shop = shopRepository.findStreatsShopByShopId(shopId)
+        if (shop.isEmpty) {
+            throw Exception("Shop not found")
+        }
+        val vendorId = shop.get().vendorId
+        val vendorFcmToken = streatsVendorService.getStreatsVendorByVendorId(vendorId).vendorFcmToken
         if (userCart.itemCount == 0) {
             throw CartException.EmptyCartException
         }
@@ -171,7 +228,8 @@ class OrderServiceImpl(
             arrivalTime = LocalTime.now().plusMinutes(10).format(DateTimeFormatter.ofLocalizedTime(FormatStyle.MEDIUM)),
             orderStatus = OrderStatus.IN_PROGRESS.name,
             paymentStatus = PaymentStatus.IN_PROGRESS.name,
-            userFcmToken = user.fcmTokenOfCurrentLoggedInDevice
+            userFcmToken = user.fcmTokenOfCurrentLoggedInDevice,
+            vendorFcmToken = vendorFcmToken
         )
     }
 
@@ -179,26 +237,41 @@ class OrderServiceImpl(
     /**
      * Update Order Status
      */
-    private fun updateOrderStatus(orderId: String, paymentStatus: PaymentStatus): Order {
+    private fun updatePaymentStatusInOrderRepo(orderId: String, paymentStatus: PaymentStatus): Order {
         val order = orderRepository.findOrderByOrderId(orderId)
-        val userId = order.userId
-
         order.paymentStatus = paymentStatus.name
-
-        pushToUserOrderHistory(userId, order)
-
-        cartService.clearCart(userId)
 
         orderRepository.save(order)
 
         return order
-
     }
 
-    private fun pushToUserOrderHistory(userId: String, order: Order) {
-        val user = userService.getStreatsCustomer(userId)
+    private fun pushToUserOrderHistory(order: Order) {
+        val user = userService.getStreatsCustomerById(order.userId)
         user.orders.add(order)
         userService.updateStreatsCustomer(user)
+    }
+
+    private fun addNewOrderToOngoingOrdersList(order: Order): Order {
+        return try {
+            val shopOptional = shopRepository.findStreatsShopByShopId(order.shopId)
+
+            if (shopOptional.isEmpty) {
+                throw Exception("Shop not found")
+            } else {
+                val shop = shopOptional.get()
+                if (shop.ongoingOrders.contains(order)) {
+                    throw Exception("Order already exists")
+                } else {
+                    shop.ongoingOrders.add(order)
+                    shopRepository.save(shop)
+                    order
+                }
+            }
+        } catch (e: Exception) {
+            throw Exception("Error occurred while adding new order in shop's ongoing orders list")
+        }
+
     }
 
     private fun extractOrderPaymentVerificationRequestParams(
@@ -222,7 +295,6 @@ class OrderServiceImpl(
 
         val clientSecret = cashfreeConfig.clientSecret
 
-//        TODO : Refactor orderCurrency and separate out request building to functions
         val cashfreeTokenRequestDTO =
             CashfreeTokenRequestDTO(order.orderId, order.totalCost.toString(), orderCurrency = CURRENCY_RUPEES)
 
