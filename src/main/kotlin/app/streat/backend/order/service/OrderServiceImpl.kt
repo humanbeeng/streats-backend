@@ -27,7 +27,7 @@ import app.streat.backend.order.domain.model.order.OrderWithToken
 import app.streat.backend.order.domain.model.status.OrderStatus
 import app.streat.backend.order.domain.model.status.PaymentStatus
 import app.streat.backend.shop.data.repositories.StreatsShopRepository
-import app.streat.backend.vendor.service.auth.StreatsVendorService
+import app.streat.backend.vendor.service.vendor_management.StreatsVendorManagementService
 import org.bson.types.ObjectId
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
@@ -53,7 +53,7 @@ class OrderServiceImpl(
     private val orderRepository: OrderRepository,
     private val notificationService: NotificationService,
     private val shopRepository: StreatsShopRepository,
-    private val streatsVendorService: StreatsVendorService
+    private val streatsVendorManagementService: StreatsVendorManagementService
 ) : OrderService {
 
     override fun findOrderByOrderId(orderId: String): Order {
@@ -211,7 +211,7 @@ class OrderServiceImpl(
             throw Exception("Shop not found")
         }
         val vendorId = shop.get().vendorId
-        val vendorFcmToken = streatsVendorService.getStreatsVendorByVendorId(vendorId).vendorFcmToken
+        val vendorFcmToken = streatsVendorManagementService.getStreatsVendorByVendorId(vendorId).vendorFcmToken
         if (userCart.itemCount == 0) {
             throw CartException.EmptyCartException
         }
