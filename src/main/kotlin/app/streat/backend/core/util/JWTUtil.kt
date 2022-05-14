@@ -6,12 +6,16 @@ import app.streat.backend.auth.utils.AuthConstants.BEARER_STRING_LENGTH
 import app.streat.backend.auth.utils.AuthConstants.JWT_ISSUER
 import app.streat.backend.auth.utils.AuthConstants.PARAM_ROLES
 import app.streat.backend.core.config.JWTConfig
+import app.streat.backend.vendor.domain.models.streats_vendor.StreatsVendor
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.auth0.jwt.interfaces.DecodedJWT
 import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.stereotype.Component
 
+/**
+ * Note : TODO : Replace FirebaseUID with appropriate names
+ */
 @Component
 class JWTUtil(jwtConfig: JWTConfig) {
 
@@ -31,6 +35,17 @@ class JWTUtil(jwtConfig: JWTConfig) {
             .sign(Algorithm.HMAC256(jwtSigningKey))
     }
 
+    fun createVendorAccessToken(streatsVendor: StreatsVendor): String {
+        val roles: MutableList<String> = mutableListOf()
+
+        streatsVendor.roles.forEach { role -> roles.add(role) }
+
+        return JWT.create()
+            .withIssuer(JWT_ISSUER)
+            .withSubject(streatsVendor.vendorId)
+            .withClaim(PARAM_ROLES, roles)
+            .sign(Algorithm.HMAC256(jwtSigningKey))
+    }
 
     fun verifyAccessToken(accessToken: String): Boolean {
         val verifier = JWT.require(Algorithm.HMAC256(jwtSigningKey)).build()
@@ -65,7 +80,7 @@ class JWTUtil(jwtConfig: JWTConfig) {
         }
     }
 
-    fun getUserId(authorizationHeader: String): String {
+    fun getId(authorizationHeader: String): String {
         return if (isAuthorizationHeaderValid(authorizationHeader)) {
             val incomingAccessToken = authorizationHeader.substring(BEARER_STRING_LENGTH)
 
