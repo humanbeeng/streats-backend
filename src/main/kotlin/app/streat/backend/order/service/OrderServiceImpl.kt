@@ -86,6 +86,19 @@ class OrderServiceImpl(
 
         val order = createOrder(userId)
 
+        val shopId = order.shopId
+
+        val shopOptional = shopRepository.findStreatsShopByShopId(shopId)
+
+        if (shopOptional.isEmpty) {
+            throw Exception("Shop not found")
+        }
+        val shop = shopOptional.get()
+
+        if (shop.isShopOpen.not()) {
+            throw Exception("Shop is closed")
+        }
+
         addOrderToOrderRepo(order)
 
         val tokenRequest = createTokenRequest(order)
@@ -149,7 +162,9 @@ class OrderServiceImpl(
      *
      * TODO : Add fallback if any of the steps failed.
      */
-    override fun verifyOrderPaymentAndPlaceOrder(orderPaymentVerificationRequestParams: LinkedHashMap<String, String>): Boolean {
+    override fun verifyOrderPaymentAndPlaceOrder(
+        orderPaymentVerificationRequestParams: LinkedHashMap<String, String>
+    ): Boolean {
         val paymentVerificationData =
             extractOrderPaymentVerificationRequestParams(orderPaymentVerificationRequestParams)
 
@@ -177,7 +192,7 @@ class OrderServiceImpl(
 
             userService.clearCart(paymentSuccessOrder.userId)
 
-            pushToUserOrderHistory(paymentSuccessOrder)
+            userService.pushToUserOrderHistory(paymentSuccessOrder)
 
             addNewOrderToOngoingOrdersList(paymentSuccessOrder)
 
@@ -193,7 +208,7 @@ class OrderServiceImpl(
     private fun failOrder(orderId: String): Boolean {
         return try {
             val paymentFailedOrder = updatePaymentStatusInOrderRepo(orderId, PaymentStatus.FAILURE)
-            pushToUserOrderHistory(paymentFailedOrder)
+            userService.pushToUserOrderHistory(paymentFailedOrder)
             notificationService.notifyOrderToUser(paymentFailedOrder)
         } catch (e: Exception) {
             false
@@ -246,30 +261,25 @@ class OrderServiceImpl(
         return order
     }
 
-    private fun pushToUserOrderHistory(order: Order) {
-        val user = userService.getStreatsCustomerById(order.userId)
-        user.orders.add(order)
-        userService.updateStreatsCustomer(user)
-    }
 
     private fun addNewOrderToOngoingOrdersList(order: Order): Order {
         return try {
             val shopOptional = shopRepository.findStreatsShopByShopId(order.shopId)
-
             if (shopOptional.isEmpty) {
-                throw Exception("Shop not found")
-            } else {
-                val shop = shopOptional.get()
-                if (shop.ongoingOrders.contains(order)) {
-                    throw Exception("Order already exists")
-                } else {
-                    shop.ongoingOrders.add(order)
-                    shopRepository.save(shop)
-                    order
-                }
+                throw Exception("Shop doesn't exist")
             }
+            val shop = shopOptional.get()
+
+            if (shop.ongoingOrders.contains(order)) {
+                throw Exception("Order already exists")
+            } else {
+                shop.ongoingOrders.add(order)
+                shopRepository.save(shop)
+                order
+            }
+
         } catch (e: Exception) {
-            throw Exception("Error occurred while adding new order in shop's ongoing orders list")
+            throw Exception("Something went wrong while adding new order to ongoing orders list")
         }
 
     }

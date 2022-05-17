@@ -67,4 +67,10 @@ class StreatsUserService(private val repo: AuthRepository) : UserDetailsService 
 
     }
 
+    fun pushToUserOrderHistory(order: Order) {
+        val user = getStreatsCustomerById(order.userId)
+        user.orders.add(order)
+        updateStreatsCustomer(user)
+    }
+
 }
