@@ -7,6 +7,8 @@ import app.streat.backend.order.service.OrderService
 import app.streat.backend.shop.domain.models.StreatsShop
 import app.streat.backend.shop.services.ShopService
 import app.streat.backend.vendor.domain.models.ShopStatus
+import app.streat.backend.vendor.domain.models.home.VendorHome
+import app.streat.backend.vendor.service.vendor_management.StreatsVendorManagementService
 import org.springframework.stereotype.Service
 
 /**
@@ -20,8 +22,34 @@ import org.springframework.stereotype.Service
 class VendorOperationsServiceImpl(
     private val shopService: ShopService,
     private val orderService: OrderService,
+    private val streatsVendorManagementService: StreatsVendorManagementService,
     private val streatsUserService: StreatsUserService
 ) : VendorOperationsService {
+    override fun fetchHome(vendorId: String): VendorHome {
+        return try {
+            val vendor = streatsVendorManagementService.getStreatsVendorByVendorId(vendorId)
+            val shopId = vendor.shopId
+            val shop = shopService.findShopByShopId(shopId)
+
+            VendorHome(
+                shopId = shopId,
+                vendorId = vendorId,
+                ongoingOrders = shop.ongoingOrders.toList(),
+                shopName = shop.shopName,
+                shopStatus = parseBooleanAsShopStatus(shop.isShopOpen)
+            )
+
+        } catch (e: Exception) {
+            throw e
+        }
+    }
+
+    private fun parseBooleanAsShopStatus(isShopOpen: Boolean): ShopStatus {
+        return if (isShopOpen)
+            ShopStatus.OPEN
+        else ShopStatus.CLOSED
+    }
+
 
     override fun updateShopStatus(vendorId: String, shopStatus: ShopStatus): StreatsShop {
         return try {

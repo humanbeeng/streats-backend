@@ -2,7 +2,7 @@ package app.streat.backend.vendor.data.dto.status
 
 import app.streat.backend.vendor.domain.models.ShopStatus
 
-data class ShopStatusUpdateDTO(
+data class ShopStatusDTO(
     val shopStatus: String
 ) {
     fun toShopStatus(): ShopStatus {

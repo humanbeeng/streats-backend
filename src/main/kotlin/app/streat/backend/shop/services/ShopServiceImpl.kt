@@ -6,6 +6,7 @@ import app.streat.backend.shop.data.repositories.StreatsShopRepository
 import app.streat.backend.shop.domain.models.DishItem
 import app.streat.backend.shop.domain.models.StreatsShop
 import app.streat.backend.vendor.domain.models.ShopStatus
+import app.streat.backend.vendor.service.vendor_management.StreatsVendorManagementService
 import org.bson.types.ObjectId
 import org.springframework.data.mongodb.core.geo.GeoJsonPoint
 import org.springframework.stereotype.Service
@@ -16,7 +17,8 @@ import org.springframework.stereotype.Service
 @Service
 class ShopServiceImpl(
     private val repo: StreatsShopRepository,
-    private val orderService: OrderService
+    private val orderService: OrderService,
+    private val vendorManagementService: StreatsVendorManagementService,
 ) : ShopService {
 
     /**
@@ -67,7 +69,11 @@ class ShopServiceImpl(
 
 
     override fun clearAllCurrentDayOrders(vendorId: String): StreatsShop {
-        TODO("Not yet implemented")
+        val vendor = vendorManagementService.getStreatsVendorByVendorId(vendorId)
+        val shopId = vendor.shopId
+        val shop = getShopById(shopId)
+        shop.ongoingOrders.clear()
+        return repo.save(shop)
     }
 
 

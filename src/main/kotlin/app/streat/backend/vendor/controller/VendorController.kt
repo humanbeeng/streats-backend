@@ -5,8 +5,11 @@ import app.streat.backend.order.domain.model.order.Order
 import app.streat.backend.vendor.data.dto.auth.VendorAuthRequestDTO
 import app.streat.backend.vendor.data.dto.auth.VendorLoginRequestDTO
 import app.streat.backend.vendor.data.dto.auth.VendorLoginResponseDTO
+import app.streat.backend.vendor.data.dto.home.StreatsShopDTO
+import app.streat.backend.vendor.data.dto.home.VendorHomeDTO
 import app.streat.backend.vendor.data.dto.status.OrderStatusUpdateDTO
-import app.streat.backend.vendor.data.dto.status.ShopStatusUpdateDTO
+import app.streat.backend.vendor.data.dto.status.ShopStatusDTO
+import app.streat.backend.vendor.domain.models.ShopStatus
 import app.streat.backend.vendor.service.vendor_management.StreatsVendorManagementService
 import app.streat.backend.vendor.service.vendor_operations.VendorOperationsService
 import com.google.common.net.HttpHeaders
@@ -64,15 +67,48 @@ class VendorController(
         }
     }
 
+    @GetMapping("/home")
+    fun fetchHome(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) accessToken: String
+    ): ResponseEntity<VendorHomeDTO> {
+        return try {
+            val vendorId = jwtUtil.getId(accessToken)
+            val vendorHome = vendorOperationsService.fetchHome(vendorId)
+            val vendorHomeDTO = VendorHomeDTO(
+                StreatsShopDTO(
+                    shopId = vendorHome.shopId,
+                    vendorId = vendorId,
+                    shopName = vendorHome.shopName,
+                    ongoingOrders = vendorHome.ongoingOrders,
+                    shopStatus = ShopStatusDTO(shopStatus = vendorHome.shopStatus.name)
+                )
+            )
+            ResponseEntity.ok(vendorHomeDTO)
+        } catch (e: Exception) {
+            ResponseEntity.badRequest().build()
+        }
+    }
+
     @PostMapping("/shop")
     fun updateShopStatus(
         @RequestHeader(HttpHeaders.AUTHORIZATION) accessToken: String,
-        @RequestBody shopStatusUpdateDTO: ShopStatusUpdateDTO,
-    ): ResponseEntity<Unit> {
+        @RequestBody shopStatusDTO: ShopStatusDTO,
+    ): ResponseEntity<StreatsShopDTO> {
         return try {
             val vendorId = jwtUtil.getId(accessToken)
-            vendorOperationsService.updateShopStatus(vendorId, shopStatusUpdateDTO.toShopStatus())
-            ResponseEntity.ok().build()
+            val updatedShop = vendorOperationsService.updateShopStatus(vendorId, shopStatusDTO.toShopStatus())
+            val shopStatus = when (updatedShop.isShopOpen) {
+                true -> ShopStatus.OPEN
+                false -> ShopStatus.CLOSED
+            }
+            val streatsShopDTO = StreatsShopDTO(
+                shopId = updatedShop.shopId!!,
+                vendorId = updatedShop.vendorId,
+                shopStatus = ShopStatusDTO(shopStatus = shopStatus.name),
+                ongoingOrders = updatedShop.ongoingOrders,
+                shopName = updatedShop.shopName
+            )
+            ResponseEntity.ok(streatsShopDTO)
         } catch (e: Exception) {
             ResponseEntity.badRequest().build()
         }
@@ -86,8 +122,9 @@ class VendorController(
         @RequestBody orderStatusUpdateDTO: OrderStatusUpdateDTO
     ): ResponseEntity<Order> {
         return try {
-            val updatedOrder =
-                vendorOperationsService.updateOrderStatus(orderStatusUpdateDTO.orderId, orderStatusUpdateDTO.toOrderStatus())
+            val updatedOrder = vendorOperationsService.updateOrderStatus(
+                orderStatusUpdateDTO.orderId, orderStatusUpdateDTO.toOrderStatus()
+            )
             ResponseEntity.ok(updatedOrder)
         } catch (e: Exception) {
             ResponseEntity.badRequest().build()
