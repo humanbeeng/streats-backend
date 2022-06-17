@@ -1,7 +1,7 @@
 package app.streat.backend.cart.service
 
 import app.streat.backend.auth.service.StreatsUserService
-import app.streat.backend.cart.data.dto.CartDTO
+import app.streat.backend.cart.data.dto.CartRequestDTO
 import app.streat.backend.cart.domain.models.Cart
 import app.streat.backend.cart.domain.models.CartItem
 import app.streat.backend.cart.service.exceptions.CartException
@@ -11,8 +11,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class CartServiceImpl(
-    private val userService: StreatsUserService,
-    private val shopService: ShopService
+    private val userService: StreatsUserService, private val shopService: ShopService
 ) : CartService {
     override fun getUserCart(userId: String): Cart {
         val user = userService.getStreatsCustomerById(userId)
@@ -29,32 +28,37 @@ class CartServiceImpl(
      *  TODO : Needs refactoring
      *
      *  @param userId : String
-     *  @param cartDTO : CartDTO
+     *  @param cartRequestDTO : CartDTO
      *  @return Cart
      *  @throws CartException.ItemFromDifferentShopException
      *  @throws CartException.ItemNotFoundFromShopException
      *
      *
      */
-    override fun addToCart(userId: String, cartDTO: CartDTO): Cart {
+    override fun addToCart(userId: String, cartRequestDTO: CartRequestDTO): Cart {
         val user = userService.getStreatsCustomerById(userId)
-        val dishId = cartDTO.dishId
-        val shopId = cartDTO.shopId
-        val dishItem = shopService.getShopById(shopId).shopItems[dishId]
-            ?: throw CartException.ItemNotFoundFromShopException
+        val dishId = cartRequestDTO.dishId
+        val shopId = cartRequestDTO.shopId
+        val shop = shopService.getShopByShopId(shopId)
+        val dishItem = shop.shopItems[dishId] ?: throw CartException.ItemNotFoundFromShopException
 
         if (isCartItemAddable(shopId, user.cart).not()) {
             throw CartException.ItemFromDifferentShopException
         } else {
             if (user.cart.cartItems.containsKey(dishId)) {
-                val cartItem = user.cart.cartItems[dishId]
-                    ?: throw CartException.ItemFetchFromCartException
+                val cartItem = user.cart.cartItems[dishId] ?: throw CartException.ItemFetchFromCartException
                 cartItem.quantity = cartItem.quantity.plus(1)
                 user.cart.cartItems[dishId] = cartItem
                 user.cart.totalCost = user.cart.totalCost + dishItem.price
             } else {
+                user.cart.shopName = shop.shopName
                 user.cart.shopId = shopId
-                user.cart.cartItems[dishId] = CartItem(shopId, dishItem.dishName, 1, dishItem.price)
+                user.cart.cartItems[dishId] = CartItem(
+                    shopId = shopId,
+                    itemName = dishItem.dishName,
+                    quantity = 1,
+                    price = dishItem.price,
+                )
                 user.cart.totalCost = user.cart.totalCost + dishItem.price
                 user.cart.itemCount = user.cart.cartItems.size
             }
@@ -75,14 +79,14 @@ class CartServiceImpl(
      * TODO : Needs refactoring
      *
      * @param userId : String
-     * @param cartDTO : CartDTO
+     * @param cartRequestDTO : CartDTO
      * @return Cart
      *
      *
      */
 
-    override fun removeFromCart(userId: String, cartDTO: CartDTO): Cart {
-        val dishId = cartDTO.dishId
+    override fun removeFromCart(userId: String, cartRequestDTO: CartRequestDTO): Cart {
+        val dishId = cartRequestDTO.dishId
 
         val user = userService.getStreatsCustomerById(userId)
 
@@ -107,6 +111,11 @@ class CartServiceImpl(
         }
         return userService.updateStreatsCustomer(user).cart
 
+    }
+
+    override fun getUserCartItemCount(userId: String): Int {
+        val user = userService.getStreatsCustomerById(userId)
+        return user.cart.itemCount
     }
 
 

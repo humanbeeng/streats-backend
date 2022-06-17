@@ -1,6 +1,6 @@
 package app.streat.backend.cart.data.dto
 
-data class CartDTO(
+data class CartRequestDTO(
     val dishId: String,
     val shopId: String
 )

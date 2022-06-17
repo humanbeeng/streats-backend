@@ -1,6 +1,6 @@
 package app.streat.backend.cart.controllers
 
-import app.streat.backend.cart.data.dto.CartDTO
+import app.streat.backend.cart.data.dto.CartRequestDTO
 import app.streat.backend.cart.domain.models.Cart
 import app.streat.backend.cart.service.CartService
 import app.streat.backend.core.util.JWTUtil
@@ -12,8 +12,7 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @RequestMapping("/cart")
 class CartController(
-    private val jwtUtil: JWTUtil,
-    private val cartService: CartService
+    private val jwtUtil: JWTUtil, private val cartService: CartService
 ) {
 
     @GetMapping
@@ -33,12 +32,11 @@ class CartController(
 
     @PostMapping
     fun addToCart(
-        @RequestHeader(HEADER_AUTHORIZATION) accessToken: String,
-        @RequestBody cartDTO: CartDTO
+        @RequestHeader(HEADER_AUTHORIZATION) accessToken: String, @RequestBody cartRequestDTO: CartRequestDTO
     ): ResponseEntity<Cart> {
 
         return try {
-            val updatedCart = cartService.addToCart(jwtUtil.getId(accessToken), cartDTO)
+            val updatedCart = cartService.addToCart(jwtUtil.getId(accessToken), cartRequestDTO)
             ResponseEntity.ok(updatedCart)
         } catch (e: Exception) {
             ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).build()
@@ -48,13 +46,26 @@ class CartController(
 
     @PostMapping("/remove")
     fun deleteCartItem(
-        @RequestHeader(HEADER_AUTHORIZATION) accessToken: String,
-        @RequestBody cartDTO: CartDTO
+        @RequestHeader(HEADER_AUTHORIZATION) accessToken: String, @RequestBody cartRequestDTO: CartRequestDTO
     ): ResponseEntity<Cart> {
         return try {
             val userId = jwtUtil.getId(accessToken)
-            val updatedCart = cartService.removeFromCart(userId, cartDTO)
+            val updatedCart = cartService.removeFromCart(userId, cartRequestDTO)
             ResponseEntity.ok(updatedCart)
+        } catch (e: Exception) {
+            ResponseEntity.badRequest().build()
+        }
+    }
+
+
+    @GetMapping("/count")
+    fun getUserCartCount(
+        @RequestHeader(HEADER_AUTHORIZATION) accessToken: String,
+    ): ResponseEntity<Int> {
+        return try {
+            val userId = jwtUtil.getId(accessToken)
+            val userCartItemCount = cartService.getUserCartItemCount(userId)
+            ResponseEntity.ok(userCartItemCount)
         } catch (e: Exception) {
             ResponseEntity.badRequest().build()
         }
