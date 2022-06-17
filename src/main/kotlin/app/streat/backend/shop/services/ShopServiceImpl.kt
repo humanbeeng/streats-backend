@@ -38,8 +38,8 @@ class ShopServiceImpl(
     }
 
 
-    override fun getAllNearbyShops(geoJsonPoint: GeoJsonPoint): List<StreatsShop> {
-        return repo.findByLocationNear(geoJsonPoint)
+    override fun getAllNearbyShops(coordinates: GeoJsonPoint): List<StreatsShop> {
+        return repo.findByCoordinatesNear(coordinates)
     }
 
     override fun updateShopStatus(vendorId: String, shopStatus: ShopStatus): StreatsShop {
@@ -59,7 +59,7 @@ class ShopServiceImpl(
         try {
             val order = orderService.findOrderByOrderId(orderId)
             val shopId = order.shopId
-            val shop = getShopById(shopId)
+            val shop = getShopByShopId(shopId)
             shop.ongoingOrders.find { it.orderId == orderId }?.orderStatus = orderStatus.name
             repo.save(shop)
         } catch (e: Exception) {
@@ -71,7 +71,7 @@ class ShopServiceImpl(
     override fun clearAllCurrentDayOrders(vendorId: String): StreatsShop {
         val vendor = vendorManagementService.getStreatsVendorByVendorId(vendorId)
         val shopId = vendor.shopId
-        val shop = getShopById(shopId)
+        val shop = getShopByShopId(shopId)
         shop.ongoingOrders.clear()
         return repo.save(shop)
     }
@@ -94,11 +94,7 @@ class ShopServiceImpl(
     }
 
 
-    override fun findShopsByZipCode(zipCode: String): List<StreatsShop> {
-        return repo.findStreatsShopByZipcode(zipCode)
-    }
-
-    override fun getShopById(shopId: String): StreatsShop {
+    override fun getShopByShopId(shopId: String): StreatsShop {
         return repo.findStreatsShopByShopId(shopId).orElseThrow { NoSuchElementException("No shop with shop ID found") }
     }
 
@@ -109,53 +105,93 @@ class ShopServiceImpl(
 
         val dummyShops = mutableListOf(
             StreatsShop(
-                shopName = "Test Shop 1", shopOwnerPhoneNumber = "9876543231", location = GeoJsonPoint(
-                    -73.93414657, 43.82302903
-                ), zipcode = "100000", isShopOpen = true,
+                shopName = "Test Shop 1",
+                shopOwnerPhoneNumber = "9876543231",
+                coordinates = GeoJsonPoint(0.00, 0.00),
+                zipCode = "577201",
+                locationName = "Gopala Extension",
+                isShopOpen = true,
 
                 shopItems = mutableMapOf(
                     ObjectId().toString() to DishItem("Masala Puri", 90.00),
-                    ObjectId().toString() to DishItem("Gobi Manchurian", 45.00)
-                ), isTakeawaySupported = true, featured = false
-            ),
-            StreatsShop(
-                shopName = "Test Shop 2", shopOwnerPhoneNumber = "9876543231", location = GeoJsonPoint(
-                    -74.00310999999999, 40.7348888
-                ), zipcode = "100004", isShopOpen = true, shopItems = mutableMapOf(
-                    ObjectId().toString() to DishItem("Masala Puri", 90.00),
-                    ObjectId().toString() to DishItem("Gobi Manchurian", 45.00)
-                ), isTakeawaySupported = true, featured = false
+                    ObjectId().toString() to DishItem("Gobi Manchurian", 45.00),
+                    ObjectId().toString() to DishItem("Bhel Puri", 30.00),
+                    ObjectId().toString() to DishItem("Dahi Puri", 60.50),
+                    ObjectId().toString() to DishItem("Pakoda Masala", 50.00),
+                    ObjectId().toString() to DishItem("Samosa", 30.00),
 
+                    ),
+                isTakeawaySupported = true,
+                featured = false,
+                vendorId = "j5XTAhDFCrTZjptddLAJP8UMK042"
             ),
             StreatsShop(
-                shopName = "Test Shop 3", shopOwnerPhoneNumber = "9876543231", location = GeoJsonPoint(
-                    -73.7522366, 40.7766941
-                ), zipcode = "100005", isShopOpen = true, shopItems = mutableMapOf(
-                    ObjectId().toString() to DishItem("Masala Puri", 90.00),
-                    ObjectId().toString() to DishItem("Gobi Manchurian", 45.00)
-                ), isTakeawaySupported = true, featured = true
-            ),
-            StreatsShop(
-                shopName = "Test Shop 4",
-                vendorId = "j5XTAhDFCrTZjptddLAJP8UMK042",
+                shopName = "Test Shop 2",
                 shopOwnerPhoneNumber = "9876543231",
-                location = GeoJsonPoint(
-                    -73.99950489999999, 40.7169224
-                ),
-                zipcode = "100000",
-                isShopOpen = false,
+                coordinates = GeoJsonPoint(0.00, 0.00),
+                zipCode = "577201",
+                locationName = "Alkola",
+                isShopOpen = true,
+
                 shopItems = mutableMapOf(
                     ObjectId().toString() to DishItem("Masala Puri", 90.00),
                     ObjectId().toString() to DishItem("Gobi Manchurian", 45.00)
                 ),
                 isTakeawaySupported = true,
-                featured = false
+                featured = false,
+                vendorId = "j5XTAhDFCrTZjptddLAJP8UMK042"
+            ),
+            StreatsShop(
+                shopName = "Test Shop 3",
+                shopOwnerPhoneNumber = "9876543231",
+                coordinates = GeoJsonPoint(3.00, 0.00),
+                zipCode = "577201",
+                locationName = "Gopi Circle",
+                isShopOpen = true,
 
+                shopItems = mutableMapOf(
+                    ObjectId().toString() to DishItem("Masala Puri", 90.00),
+                    ObjectId().toString() to DishItem("Gobi Manchurian", 45.00)
+                ),
+                isTakeawaySupported = true,
+                featured = false,
+                vendorId = "j5XTAhDFCrTZjptddLAJP8UMK042"
+            ),
+            StreatsShop(
+                shopName = "Test Shop 4",
+                shopOwnerPhoneNumber = "9876543231",
+                coordinates = GeoJsonPoint(6.00, 2.00),
+                zipCode = "577201",
+                locationName = "Hudco Colony",
+                isShopOpen = true,
+
+                shopItems = mutableMapOf(
+                    ObjectId().toString() to DishItem("Masala Puri", 90.00),
+                    ObjectId().toString() to DishItem("Gobi Manchurian", 45.00)
+                ),
+                isTakeawaySupported = true,
+                featured = true,
+                vendorId = "j5XTAhDFCrTZjptddLAJP8UMK042"
+            ),
+            StreatsShop(
+                shopName = "Test Shop 5",
+                shopOwnerPhoneNumber = "9876543231",
+                coordinates = GeoJsonPoint(1.00, 5.00),
+                zipCode = "577201",
+                locationName = "LBS Nagar",
+                isShopOpen = false,
+
+                shopItems = mutableMapOf(
+                    ObjectId().toString() to DishItem("Masala Puri", 90.00),
+                    ObjectId().toString() to DishItem("Gobi Manchurian", 45.00)
+                ),
+                isTakeawaySupported = true,
+                featured = false,
+                vendorId = "j5XTAhDFCrTZjptddLAJP8UMK042"
             ),
 
-            )
+        )
         return repo.saveAll(dummyShops)
-
     }
 
     /**

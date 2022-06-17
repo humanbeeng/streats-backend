@@ -38,7 +38,7 @@ class HomeController(
     @GetMapping("/{shopId}")
     fun shop(@PathVariable shopId: String): ResponseEntity<StreatsShop> {
         return try {
-            val shop = shopService.getShopById(shopId)
+            val shop = shopService.getShopByShopId(shopId)
             ResponseEntity.ok(shop)
         } catch (e: NoSuchElementException) {
             ResponseEntity.badRequest().build()

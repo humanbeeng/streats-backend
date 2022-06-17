@@ -5,10 +5,11 @@ import javax.validation.constraints.Min
 
 data class Cart(
     var shopId: String = EMPTY,
+    var shopName: String = EMPTY,
     @Min(0)
     var itemCount: Int = 0,
     var cartItems: MutableMap<String, CartItem> = mutableMapOf(),
     @Min(0)
-    var totalCost: Double = 0.00
+    var totalCost: Double = 0.00,
 )
 

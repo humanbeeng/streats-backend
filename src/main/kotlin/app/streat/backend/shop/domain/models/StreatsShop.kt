@@ -10,8 +10,10 @@ import org.springframework.data.mongodb.core.mapping.Document
 
 @Document(collection = "shops")
 data class StreatsShop(
-    @Id
-    val shopId: String? = null,
+    @Id val shopId: String? = null,
+
+//    TODO : Change it to a generic image of a shop
+    val shopImage: String = EMPTY,
 
     val shopName: String,
 
@@ -19,20 +21,21 @@ data class StreatsShop(
 
     val shopOwnerPhoneNumber: String,
 
-    @GeoSpatialIndexed(type = GeoSpatialIndexType.GEO_2DSPHERE)
-    val location: GeoJsonPoint,
+//  Note: Geospatial queries will not work out of the box when GeoJsonPoints are nested
+    @GeoSpatialIndexed(type = GeoSpatialIndexType.GEO_2DSPHERE) val coordinates: GeoJsonPoint,
 
-    val zipcode: String,
+    val zipCode: String,
 
+    val locationName: String,
 
-    val shopItems: MutableMap<String, DishItem>,
+    val shopItems: MutableMap<String, DishItem> = mutableMapOf(),
 
-    val isTakeawaySupported: Boolean,
+    val isTakeawaySupported: Boolean = false,
 
-    var isShopOpen: Boolean,
+    var isShopOpen: Boolean = false,
 
     val featured: Boolean = false,
 
-    val ongoingOrders: MutableList<Order> = emptyList<Order>().toMutableList()
+    val ongoingOrders: MutableList<Order> = mutableListOf()
 )
 
