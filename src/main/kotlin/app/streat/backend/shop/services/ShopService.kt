@@ -11,7 +11,7 @@ interface ShopService {
 
     fun getAllShops(): List<StreatsShop>
 
-    fun getAllNearbyShops(geoJsonPoint: GeoJsonPoint): List<StreatsShop>
+    fun getAllNearbyShops(coordinates: GeoJsonPoint): List<StreatsShop>
 
     fun updateShopStatus(vendorId: String, shopStatus: ShopStatus): StreatsShop
 
