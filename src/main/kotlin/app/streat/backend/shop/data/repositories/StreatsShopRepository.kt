@@ -13,11 +13,9 @@ interface StreatsShopRepository : MongoRepository<StreatsShop, String> {
 
     fun findStreatsShopByShopId(shopId: String): Optional<StreatsShop>
 
-    fun findStreatsShopByZipcode(zipCode: String): List<StreatsShop>
 
     fun findByFeaturedIsTrue(): List<StreatsShop>
 
-    fun findByLocationNear(geoJsonPoint: GeoJsonPoint): List<StreatsShop>
+    fun findByCoordinatesNear(coordinates: GeoJsonPoint): List<StreatsShop>
 
-    fun findAllByShopItems(dishId: String): List<StreatsShop>
 }

@@ -22,11 +22,9 @@ interface ShopService {
 
     fun getFeaturedShops(): List<StreatsShop>
 
-    fun getShopById(shopId: String): StreatsShop
+    fun getShopByShopId(shopId: String): StreatsShop
 
     fun findShopByShopName(shopName: String): List<StreatsShop>
-
-    fun findShopsByZipCode(zipCode: String): List<StreatsShop>
 
     fun findShopByShopId(shopId: String): StreatsShop
 
